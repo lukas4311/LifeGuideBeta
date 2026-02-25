@@ -7,17 +7,17 @@ interface HeroProps {
 
 const Hero: React.FC<HeroProps> = ({ onStartJourney }) => {
   return (
-    <section className="relative min-h-screen flex items-center justify-center overflow-hidden">
+    <section className="relative min-h-screen flex items-center justify-center overflow-hidden backImg">
       {/* Background Gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-100 via-pink-50 to-yellow-50" />
+      {/* <div className="absolute inset-0 bg-gradient-to-br from-purple-100 via-pink-50 to-yellow-50" /> */}
       
       {/* Decorative Elements */}
-      <div className="absolute top-20 left-10 w-64 h-64 bg-purple-200/30 rounded-full blur-3xl animate-pulse" />
+      {/* <div className="absolute top-20 left-10 w-64 h-64 bg-purple-200/30 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 right-10 w-80 h-80 bg-yellow-200/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }} />
-      <div className="absolute top-1/3 right-1/4 w-48 h-48 bg-teal-200/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} />
+      <div className="absolute top-1/3 right-1/4 w-48 h-48 bg-teal-200/30 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }} /> */}
       
       {/* Floating Icons */}
-      <div className="absolute top-32 left-1/4 animate-bounce" style={{ animationDuration: '3s' }}>
+      {/* <div className="absolute top-32 left-1/4 animate-bounce" style={{ animationDuration: '3s' }}>
         <Sparkles className="w-8 h-8 text-yellow-400/60" />
       </div>
       <div className="absolute top-48 right-1/3 animate-bounce" style={{ animationDuration: '4s', animationDelay: '1s' }}>
@@ -25,7 +25,7 @@ const Hero: React.FC<HeroProps> = ({ onStartJourney }) => {
       </div>
       <div className="absolute bottom-40 left-1/3 animate-bounce" style={{ animationDuration: '3.5s', animationDelay: '0.5s' }}>
         <Star className="w-7 h-7 text-purple-400/60" />
-      </div>
+      </div> */}
 
       {/* Content */}
       <div className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center pt-20">

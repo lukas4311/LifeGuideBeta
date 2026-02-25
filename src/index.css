@@ -153,4 +153,14 @@
   html {
     scroll-behavior: smooth;
   }
+
+  .backImg{
+    /* background-image: url('./assets/hero-sunrise.jpg'); */
+    background-size: cover;
+    background-position: center;
+    /* back */
+    background:
+      linear-gradient(rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0.5)),
+      url('./assets/hero-sunrise.jpg') center/cover no-repeat;
+  }
 }

@@ -1,6 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Compass, Menu, X, User, LogOut, ChevronDown, Shield } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
+import { Home, BookOpen, BarChart3, Sun, Globe } from 'lucide-react';
+import { createPageUrl } from '@/lib/utils';
 
 interface HeaderProps {
   activeModule: number | null;
@@ -27,13 +30,21 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const [showUserMenu, setShowUserMenu] = React.useState(false);
 
+  // const navItems = [
+  //   { id: null, label: 'Domů' },
+  //   { id: 1, label: 'Identita' },
+  //   { id: 2, label: 'Pravidla' },
+  //   { id: 3, label: 'Navigace' },
+  //   { id: 4, label: 'Energie' },
+  //   { id: 5, label: 'Vztahy' },
+  // ];
+
   const navItems = [
-    { id: null, label: 'Domů' },
-    { id: 1, label: 'Identita' },
-    { id: 2, label: 'Pravidla' },
-    { id: 3, label: 'Navigace' },
-    { id: 4, label: 'Energie' },
-    { id: 5, label: 'Vztahy' },
+    { id: null, name: 'Home', icon: Home, label: 'Domů' },
+    { id: 1, name: 'Modules', icon: BookOpen, label: 'Moduly' },
+    { id: 2, name: 'ModulesLegacy', icon: BookOpen, label: 'Moduly' },
+    { id: 3, name: 'DailyCheckIn', icon: Sun, label: 'Denní kontrola' },
+    { id: 4, name: 'Progress', icon: BarChart3, label: 'Pokrok' },
   ];
 
   const getUserDisplayName = () => {
@@ -49,9 +60,9 @@ const Header: React.FC<HeaderProps> = ({
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-white/95 backdrop-blur-sm shadow-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 md:h-20">
+        <div className="flex grow w-full h-20 md:h-20">
           {/* Logo */}
-          <button 
+          {/* <button 
             onClick={() => setActiveModule(null)}
             className="flex items-center gap-2 group"
           >
@@ -62,10 +73,10 @@ const Header: React.FC<HeaderProps> = ({
               <h1 className="text-lg md:text-xl font-bold text-gray-800">ŘIDIČÁK NA ŽIVOT</h1>
               <p className="text-xs text-purple-600 -mt-1">Bez kompromisů</p>
             </div>
-          </button>
+          </button> */}
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center gap-1">
+          {/* <nav className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
               <button
                 key={item.id ?? 'home'}
@@ -79,10 +90,51 @@ const Header: React.FC<HeaderProps> = ({
                 {item.label}
               </button>
             ))}
-          </nav>
+          </nav> */}
+
+          {/* Top navigation */}
+        <nav className="w-2/3 backdrop-blur-xl bg-white/70 border-b border-gray-100">
+          <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+            <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-amber-400 via-violet-500 to-rose-500 flex items-center justify-center">
+                <Sun className="w-4 h-4 text-white" />
+              </div>
+              <span className="font-bold text-gray-900 hidden sm:block text-sm tracking-wide">ŘIDIČÁK NA ŽIVOT</span>
+            </Link>
+
+            <div className="flex items-center gap-1">
+              {navItems.map(item => {
+                const Icon = item.icon;
+                const isActive = activeModule === item.id;
+                return (
+                  <Link
+                    key={item.name}
+                    to={createPageUrl(item.name)}
+                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      isActive 
+                        ? 'bg-gray-900 text-white shadow-md' 
+                        : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
+                    }`}
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="hidden md:inline">{item.label}</span>
+                  </Link>
+                );
+              })}
+              
+              {/* <button
+                onClick={toggleLanguage}
+                className="ml-2 flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 border border-gray-200"
+              >
+                <Globe className="w-4 h-4" />
+                <span>{t('switchLang')}</span>
+              </button> */}
+            </div>
+          </div>
+        </nav>
 
           {/* Auth & CTA Buttons */}
-          <div className="hidden md:flex items-center gap-3">
+          <div className="hidden md:flex items-center gap-3 ml-auto">
             {user ? (
               <div className="relative">
                 <button
@@ -151,14 +203,14 @@ const Header: React.FC<HeaderProps> = ({
               </button>
             )}
             
-            <a 
+            {/* <a 
               href="https://www.veranekvindova.cz" 
               target="_blank" 
               rel="noopener noreferrer"
               className="px-5 py-2.5 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-800 rounded-full font-semibold text-sm hover:shadow-lg transform hover:scale-105 transition-all duration-200"
             >
               Kontaktujte mě
-            </a>
+            </a> */}
           </div>
 
           {/* Mobile Menu Button */}
