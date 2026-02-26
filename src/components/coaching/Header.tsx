@@ -41,8 +41,8 @@ const Header: React.FC<HeaderProps> = ({
 
   const navItems = [
     { id: null, name: 'Home', icon: Home, label: 'Domů' },
-    { id: 1, name: 'Modules', icon: BookOpen, label: 'Moduly' },
-    { id: 2, name: 'ModulesLegacy', icon: BookOpen, label: 'Moduly' },
+    // { id: 1, name: 'Modules', icon: BookOpen, label: 'Moduly' },
+    // { id: 2, name: 'ModulesLegacy', icon: BookOpen, label: 'Moduly' },
     { id: 3, name: 'DailyCheckIn', icon: Sun, label: 'Denní kontrola' },
     { id: 4, name: 'Progress', icon: BarChart3, label: 'Pokrok' },
   ];
