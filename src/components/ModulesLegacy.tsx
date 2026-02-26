@@ -52,14 +52,14 @@ export default function ModulesLegacy() {
           animate={{ opacity: 1, y: 0 }}
           className="text-center mb-16"
         >
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 text-gray-600 text-sm font-medium mb-6">
+          {/* <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gray-100 text-gray-600 text-sm font-medium mb-6">
             <span>📚</span>
             <span>Legacy Version</span>
-          </div>
+          </div> */}
           <h1 className="text-4xl md:text-6xl font-bold text-gray-900 mb-4">
             {t('modulesTitle')}
           </h1>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto">
+          <p className="text-xl text-gray-600  max-w-3xl mx-auto">
             {t('moduleSubtitle')}
           </p>
         </motion.div>

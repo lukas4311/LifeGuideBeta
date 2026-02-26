@@ -267,7 +267,7 @@ const AppLayout: React.FC = () => {
             <ModulesLegacy></ModulesLegacy>
 
             {/* Interactive Tools Preview */}
-            <section className="py-20 bg-gradient-to-br from-purple-50 via-white to-teal-50">
+            {/* <section className="py-20 bg-gradient-to-br from-purple-50 via-white to-teal-50">
               <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="text-center mb-12">
                   <h2 className="text-3xl sm:text-4xl font-bold text-gray-800 mb-4">
@@ -278,7 +278,6 @@ const AppLayout: React.FC = () => {
                   </p>
                 </div>
 
-                {/* Tool Cards */}
                 <div className="grid md:grid-cols-3 gap-8">
                   <div 
                     onClick={() => handleModuleClick(1)}
@@ -315,7 +314,7 @@ const AppLayout: React.FC = () => {
                 </div>
 
               </div>
-            </section>
+            </section> */}
 
             {/* Testimonials */}
             <Testimonials />

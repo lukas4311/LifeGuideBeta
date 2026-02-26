@@ -8,7 +8,7 @@ export const getModulesLegacy = (t) => [
     subtitleKey: 'm1Subtitle',
     descriptionKey: 'm1Description',
     color: 'from-amber-400 to-orange-500',
-    bgColor: 'bg-amber-50',
+    bgColor: 'bg-amber-500',
     textColor: 'text-amber-700',
     borderColor: 'border-amber-200',
     accentColor: '#f59e0b',
