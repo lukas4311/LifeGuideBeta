@@ -17,6 +17,7 @@ import EnergyTracker from './coaching/EnergyTracker';
 import GratitudeJournal from './coaching/GratitudeJournal';
 import AuthModal from './coaching/AuthModal';
 import AdminDashboard from './admin/AdminDashboard';
+import ModulesLegacy from './ModulesLegacy';
 
 const AppLayout: React.FC = () => {
   const [activeModule, setActiveModule] = useState<number | null>(null);
@@ -258,11 +259,12 @@ const AppLayout: React.FC = () => {
             <Hero onStartJourney={handleStartJourney} />
             
             {/* Modules Section */}
-            <ModulesSection 
+            {/* <ModulesSection 
               moduleProgress={moduleProgress}
               activeModule={activeModule}
               onModuleClick={handleModuleClick}
-            />
+            /> */}
+            <ModulesLegacy></ModulesLegacy>
 
             {/* Interactive Tools Preview */}
             <section className="py-20 bg-gradient-to-br from-purple-50 via-white to-teal-50">
