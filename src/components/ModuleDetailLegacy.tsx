@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 // import { base44 } from '@/api/base44Client';
 import { useLanguage } from './LanguageContext';
-import { getModulesLegacy } from './ModulesDataLegacy';
+import { getModulesLegacy, getModulesFromSupabase } from './ModulesDataLegacy';
 import LessonContentLegacy from './LessonContentLegacy';
 import { CheckCircle2, Circle } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -11,53 +11,54 @@ import { Button } from "@/components/ui/button";
 
 export default function ModuleDetailLegacy() {
   const { t } = useLanguage();
-  const modules = getModulesLegacy(t);
-  const urlParams = new URLSearchParams(window.location.search);
-  const moduleId = parseInt(urlParams.get('module') || '1');
-  const module = modules.find(m => m.id === moduleId);
-  
+  const [modules, setModules] = useState([]);
+  const [module, setModule] = useState(null); // null místo undefined
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
   const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const loadProgress = async () => {
-      const data = []; //await base44.entities.UserProgress.filter({ module_id: moduleId });
-      setProgress(data);
-      setLoading(false);
-    };
-    loadProgress();
-  }, [moduleId]);
+  const urlParams = new URLSearchParams(window.location.search);
+  const moduleId = parseInt(urlParams.get('module') || '1');
 
-  if (!module) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-500">Module not found</p>
-      </div>
-    );
-  }
-
-  const Icon = module.icon;
-  const currentLesson = module.lessons[currentLessonIndex];
-  const currentProgress = currentLesson ? progress.find(p => p.lesson_id === currentLesson.id) : null;
-
-  const handleSaveProgress = async (data) => {
-    if (!currentLesson) return;
+  // 🔧 FIX: Funkce pro načtení všech dat
+  const loadData = useCallback(async () => {
+    setLoading(true);
     
-    const existing = progress.find(p => p.lesson_id === currentLesson.id);
-    // if (existing) {
-    //   await base44.entities.UserProgress.update(existing.id, data);
-    //   setProgress(prev => prev.map(p => p.id === existing.id ? { ...p, ...data } : p));
-    // } else {
-    //   const newRecord = await base44.entities.UserProgress.create({
-    //     module_id: moduleId,
-    //     lesson_id: currentLesson.id,
-    //     ...data
-    //   });
-    //   setProgress(prev => [...prev, newRecord]);
-    // }
-  };
+    try {
+      // 1. Načti moduly
+      const fetchedModules = await getModulesFromSupabase(t);
+      setModules(fetchedModules);
 
+      // 2. Hned najdi modul z načtených dat (ne ze stavu!)
+      const foundModule = fetchedModules.find((m: any) => m.id === moduleId);
+      
+      if (foundModule) {
+        setModule(foundModule);
+        // Reset lesson index na 0 pro nový modul
+        setCurrentLessonIndex(0);
+      } else {
+        console.warn(`Modul ${moduleId} nenalezen`);
+        setModule(null);
+      }
+
+      // 3. Načti progress (pokud budeš mít Supabase progress)
+      // const progressData = await supabase.from('lesson_answers').select('*').eq('module_id', moduleId);
+      // setProgress(progressData.data || []);
+      
+    } catch (error) {
+      console.error('Chyba načítání dat:', error);
+      setModule(null);
+    } finally {
+      setLoading(false);
+    }
+  }, [moduleId, t]);
+
+  // 🔧 FIX: Spusť načítání při změně moduleId
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  // 🔧 FIX: Loading state pokrývá i "module not found"
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -66,6 +67,35 @@ export default function ModuleDetailLegacy() {
     );
   }
 
+  // 🔧 FIX: Jednodušší check
+  if (!module) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-xl font-medium text-gray-900 mb-2">Modul nenalezen</p>
+          <p className="text-gray-500 mb-6">Modul {moduleId} neexistuje.</p>
+          <Link to={createPageUrl('ModulesLegacy')}>
+            <Button>Zpět na moduly</Button>
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const Icon = module.icon;
+  const currentLesson = module.lessons[currentLessonIndex];
+  const currentProgress = currentLesson 
+    ? progress.find((p: any) => p.lesson_id === currentLesson.id) 
+    : null;
+
+  const handleSaveProgress = async (data: any) => {
+    if (!currentLesson) return;
+    
+    // Placeholder pro Supabase save (přidej později)
+    console.log('Ukládám progress:', { moduleId, lessonId: currentLesson.id, data });
+  };
+
+  // ... zbytek komponenty zůstává STEJNÝ (header, sidebar, LessonContentLegacy)
   return (
     <div className="min-h-screen">
       {/* Module header */}

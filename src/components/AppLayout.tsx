@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { modules } from '@/data/modules';
-import { Target, Brain, Zap } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { User } from '@supabase/supabase-js';
 import Header from './coaching/Header';
 import Hero from './coaching/Hero';
-import ModulesSection from './coaching/ModulesSection';
 import ModuleDetail from './coaching/ModuleDetail';
 import ProgressTracker from './coaching/ProgressTracker';
 import Testimonials from './coaching/Testimonials';

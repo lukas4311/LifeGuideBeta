@@ -2,15 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 // import { base44 } from '@/api/base44Client';
 import { useLanguage } from './LanguageContext';
-import { getModulesLegacy } from './ModulesDataLegacy';
+import { getModulesFromSupabase, getModulesLegacy } from './ModulesDataLegacy';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/lib/utils';
 import { Lock, CheckCircle2, ChevronRight } from 'lucide-react';
 import { Button } from "@/components/ui/button";
+import { get } from 'http';
 
 export default function ModulesLegacy() {
   const { t } = useLanguage();
-  const modules = getModulesLegacy(t);
+  const [modules, setModules] = useState([]);
   const [progress, setProgress] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -19,6 +20,8 @@ export default function ModulesLegacy() {
       const data = [] //await base44.entities.UserProgress.list();
       setProgress(data);
       setLoading(false);
+      const fetchedModules = await getModulesFromSupabase(t); // načti moduly z DB až po načtení progressu
+      setModules(fetchedModules);
     };
     loadProgress();
   }, []);

@@ -1,4 +1,6 @@
 import { Fingerprint, BookOpen, Compass, Scale, Heart, Award } from 'lucide-react';
+import { supabase } from '@/lib/supabase'; // tvůj Supabase client
+// import { Fingerprint, BookOpen, Compass, Scale, Heart } from 'lucide-react'; // ikony
 
 export const getModulesLegacy = (t) => [
   {
@@ -102,3 +104,67 @@ export const getModulesLegacy = (t) => [
     ]
   }
 ];
+
+// Mapování icon_name → React komponenty
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
+  Fingerprint,
+  BookOpen,
+  Compass,
+  Scale,
+  Heart,
+};
+
+export const getModulesFromSupabase = async (t: (key: string) => string) => {
+  try {
+    // Načti modules + jejich lessons v jednom query
+    const { data: modulesWithLessons, error } = await supabase
+      .from('modules')
+      .select(`
+        id, slug, icon_name,
+        title_key, subtitle_key, description_key,
+        color, bg_color, text_color, border_color, accent_color, image_url,
+        lessons (
+          lesson_key, order_index,
+          title_key, content_key, exercise_key
+        )
+      `)
+      .order('id', { ascending: true });
+
+    if (error) {
+      console.error('Chyba při načítání modulů:', error);
+      throw error;
+    }
+
+    if (!modulesWithLessons || modulesWithLessons.length === 0) {
+      console.warn('Žádné moduly nenalezeny');
+      return [];
+    }
+
+    // Transformuj na přesně stejnou strukturu jako getModulesLegacy
+    return modulesWithLessons.map((module) => ({
+      id: module.id,
+      icon: iconMap[module.icon_name as keyof typeof iconMap] || Fingerprint, // fallback
+      titleKey: module.title_key,
+      subtitleKey: module.subtitle_key,
+      descriptionKey: module.description_key,
+      color: module.color,
+      bgColor: module.bg_color, // pozor: v DB je bg_color, v JS bgColor
+      textColor: module.text_color,
+      borderColor: module.border_color,
+      accentColor: module.accent_color,
+      image: module.image_url,
+      lessons: (module.lessons || [])
+        .sort((a, b) => a.order_index - b.order_index) // seřaď podle order_index
+        .map((lesson) => ({
+          id: lesson.lesson_key, // 'l1', 'l2'...
+          titleKey: lesson.title_key,
+          contentKey: lesson.content_key,
+          exerciseKey: lesson.exercise_key,
+        })),
+    }));
+  } catch (error) {
+    console.error('getModulesFromSupabase selhalo:', error);
+    // Fallback na legacy data? Nebo prázdné pole
+    return [];
+  }
+};
