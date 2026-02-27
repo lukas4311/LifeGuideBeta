@@ -8,6 +8,7 @@ import { CheckCircle2, Circle } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
+import { progressService } from '@/lib/progress';
 
 export default function ModuleDetailLegacy() {
   const { t } = useLanguage();
@@ -23,30 +24,24 @@ export default function ModuleDetailLegacy() {
   // 🔧 FIX: Funkce pro načtení všech dat
   const loadData = useCallback(async () => {
     setLoading(true);
-    
     try {
-      // 1. Načti moduly
-      const fetchedModules = await getModulesFromSupabase(t);
-      setModules(fetchedModules);
+      const [fetchedModules, progressData] = await Promise.all([
+        getModulesFromSupabase(t),
+        progressService.getModuleProgress(moduleId),
+      ]);
 
-      // 2. Hned najdi modul z načtených dat (ne ze stavu!)
-      const foundModule = fetchedModules.find((m: any) => m.id === moduleId);
-      
+      setModules(fetchedModules);
+      setProgress(progressData);
+
+      const foundModule = fetchedModules.find((m) => m.id === moduleId);
       if (foundModule) {
         setModule(foundModule);
-        // Reset lesson index na 0 pro nový modul
         setCurrentLessonIndex(0);
       } else {
-        console.warn(`Modul ${moduleId} nenalezen`);
         setModule(null);
       }
-
-      // 3. Načti progress (pokud budeš mít Supabase progress)
-      // const progressData = await supabase.from('lesson_answers').select('*').eq('module_id', moduleId);
-      // setProgress(progressData.data || []);
-      
     } catch (error) {
-      console.error('Chyba načítání dat:', error);
+      console.error('Chyba:', error);
       setModule(null);
     } finally {
       setLoading(false);
@@ -84,15 +79,34 @@ export default function ModuleDetailLegacy() {
 
   const Icon = module.icon;
   const currentLesson = module.lessons[currentLessonIndex];
-  const currentProgress = currentLesson 
-    ? progress.find((p: any) => p.lesson_id === currentLesson.id) 
+  const currentProgress = currentLesson
+    ? progress.find((p) => p.lesson_id === currentLesson.id)
     : null;
 
-  const handleSaveProgress = async (data: any) => {
+  const handleSaveProgress = async (data) => {
     if (!currentLesson) return;
-    
-    // Placeholder pro Supabase save (přidej později)
-    console.log('Ukládám progress:', { moduleId, lessonId: currentLesson.id, data });
+
+    try {
+      const saved = await progressService.saveLessonProgress({
+        moduleId,
+        lessonId: currentLesson.id,  // 'l1'
+        reflection_text: data.reflection_text,
+        energy_rating: data.energy_rating,
+        completed: data.completed,
+      });
+
+      // Aktualizuj lokální progress
+      setProgress((prev) =>
+        prev.find((p) => p.lesson_key === currentLesson.id)
+          ? prev.map((p) =>
+            p.lesson_key === currentLesson.id ? { ...saved } : p
+          )
+          : [...prev, saved]
+      );
+    } catch (error) {
+      console.error('Chyba ukládání progressu:', error);
+      // toast.error('Nepodařilo se uložit progress');
+    }
   };
 
   // ... zbytek komponenty zůstává STEJNÝ (header, sidebar, LessonContentLegacy)
@@ -101,14 +115,14 @@ export default function ModuleDetailLegacy() {
       {/* Module header */}
       <div className="relative overflow-hidden">
         <div className="relative h-64 md:h-72">
-          <img 
-            src={module.image} 
+          <img
+            src={module.image}
             alt={t(module.titleKey)}
             className="w-full h-full object-cover"
           />
           <div className={`absolute inset-0 bg-gradient-to-t ${module.color} opacity-70`} />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
-          
+
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
             <div className="max-w-3xl mx-auto">
               <div className="flex items-center gap-3 mb-3">
@@ -142,11 +156,10 @@ export default function ModuleDetailLegacy() {
                     <button
                       key={lesson.id}
                       onClick={() => setCurrentLessonIndex(index)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all duration-200 whitespace-nowrap lg:whitespace-normal min-w-fit ${
-                        isActive
-                          ? `bg-white shadow-md border ${module.borderColor}`
-                          : 'hover:bg-gray-50'
-                      }`}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all duration-200 whitespace-nowrap lg:whitespace-normal min-w-fit ${isActive
+                        ? `bg-white shadow-md border ${module.borderColor}`
+                        : 'hover:bg-gray-50'
+                        }`}
                     >
                       {isDone ? (
                         <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
