@@ -180,9 +180,9 @@ const Header: React.FC<HeaderProps> = ({
                         </button>
                       )}
                       <button
-                        onClick={() => {
+                        onClick={async () => {
                           setShowUserMenu(false);
-                          onSignOut();
+                          await onSignOut();
                         }}
                         className="w-full flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
                       >
@@ -284,9 +284,9 @@ const Header: React.FC<HeaderProps> = ({
                     </button>
                   )}
                   <button
-                    onClick={() => {
+                    onClick={async () => {
                       setMobileMenuOpen(false);
-                      onSignOut();
+                      await onSignOut();
                     }}
                     className="mt-2 px-4 py-3 bg-red-50 text-red-600 rounded-lg font-medium flex items-center gap-2"
                   >
