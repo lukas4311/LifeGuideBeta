@@ -25,6 +25,7 @@ export default function LessonContentLegacy({
   const [reflection, setReflection] = useState(progressData?.reflection_text || '');
   const [energyRating, setEnergyRating] = useState(progressData?.energy_rating || 5);
   const [saving, setSaving] = useState(false);
+  const [completed, setCompleted] = useState(progressData?.completed || false);
 
   const isCompleted = progressData?.completed;
 

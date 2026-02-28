@@ -11,6 +11,8 @@ export const progressService = {
       .order('lesson_key');
 
     if (error) throw error;
+    
+    console.log(`📊 Progress pro modul ${moduleId}:`, data); // Debug
     return data || [];
   },
 

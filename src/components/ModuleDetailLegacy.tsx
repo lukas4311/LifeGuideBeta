@@ -25,10 +25,15 @@ export default function ModuleDetailLegacy() {
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
+      console.log('🔄 Načítám modul:', moduleId);
+
       const [fetchedModules, progressData] = await Promise.all([
         getModulesFromSupabase(t),
         progressService.getModuleProgress(moduleId),
       ]);
+
+      console.log('📚 Moduly:', fetchedModules.length);
+      console.log('📊 Progress:', progressData);
 
       setModules(fetchedModules);
       setProgress(progressData);
@@ -38,11 +43,11 @@ export default function ModuleDetailLegacy() {
         setModule(foundModule);
         setCurrentLessonIndex(0);
       } else {
+        console.warn('❌ Modul nenalezen:', moduleId);
         setModule(null);
       }
     } catch (error) {
-      console.error('Chyba:', error);
-      setModule(null);
+      console.error('💥 loadData error:', error);
     } finally {
       setLoading(false);
     }
@@ -80,7 +85,7 @@ export default function ModuleDetailLegacy() {
   const Icon = module.icon;
   const currentLesson = module.lessons[currentLessonIndex];
   const currentProgress = currentLesson
-    ? progress.find((p) => p.lesson_id === currentLesson.id)
+    ? progress.find((p) => p.lesson_key === currentLesson.id)  // ✅ lesson_key místo lesson_id
     : null;
 
   const handleSaveProgress = async (data) => {
@@ -89,13 +94,15 @@ export default function ModuleDetailLegacy() {
     try {
       const saved = await progressService.saveLessonProgress({
         moduleId,
-        lessonId: currentLesson.id,  // 'l1'
+        lessonId: currentLesson.id,  // 'l1' – OK
         reflection_text: data.reflection_text,
         energy_rating: data.energy_rating,
         completed: data.completed,
       });
 
-      // Aktualizuj lokální progress
+      console.log('✅ Uloženo:', saved); // Debug
+
+      // ✅ FIX: Použij lesson_key pro matching
       setProgress((prev) =>
         prev.find((p) => p.lesson_key === currentLesson.id)
           ? prev.map((p) =>
@@ -104,8 +111,7 @@ export default function ModuleDetailLegacy() {
           : [...prev, saved]
       );
     } catch (error) {
-      console.error('Chyba ukládání progressu:', error);
-      // toast.error('Nepodařilo se uložit progress');
+      console.error('❌ Chyba ukládání:', error);
     }
   };
 
