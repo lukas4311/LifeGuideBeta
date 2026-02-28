@@ -16,6 +16,16 @@ export const progressService = {
     return data || [];
   },
 
+  getAllUserProgress: async () => {
+    const { data, error } = await supabase
+      .from('user_progress')
+      .select('*')
+      .order('module_id, lesson_key');
+    
+    if (error) throw error;
+    return data || [];
+  },
+
   // Ulož/aktualizuj progress pro lesson
   saveLessonProgress: async (params: {
     moduleId: number;
