@@ -15,7 +15,7 @@ import EnergyTracker from './coaching/EnergyTracker';
 import GratitudeJournal from './coaching/GratitudeJournal';
 import AuthModal from './coaching/AuthModal';
 import AdminDashboard from './admin/AdminDashboard';
-import ModulesLegacy from './ModulesLegacy';
+import { Outlet, useLocation } from 'react-router-dom';
 
 const AppLayout: React.FC = () => {
   const [activeModule, setActiveModule] = useState<number | null>(null);
@@ -209,6 +209,9 @@ const AppLayout: React.FC = () => {
     setShowAuthModal(false);
   };
 
+  const location = useLocation();
+  const isRootPath = location.pathname === '/';
+
   const currentModule = activeModule ? modules.find(m => m.id === activeModule) : null;
 
   // Admin dashboard
@@ -250,10 +253,11 @@ const AppLayout: React.FC = () => {
       <main className="pt-16 md:pt-20">
         {activeModule === null ? (
           <>
-            <Hero onStartJourney={handleStartJourney} />
-            <ModulesLegacy />
-            <Testimonials />
-            <ContactSection />
+            {isRootPath && <Hero onStartJourney={handleStartJourney} />}
+            {/* render whatever route is active */}
+            <Outlet />
+            {isRootPath && <Testimonials />}
+            {isRootPath && <ContactSection />}
           </>
         ) : currentModule ? (
           <div className="relative">

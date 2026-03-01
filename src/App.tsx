@@ -5,12 +5,14 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "@/components/theme-provider";
-import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ModuleDetailLegacy from "./components/ModuleDetailLegacy";
 import { LanguageProvider, useLanguage } from './components/LanguageContext';
 import DailyCheckIn from "./components/DailyCheckIn";
 import Progress from "./components/Progress";
+import AppLayout from "./components/AppLayout";
+import ModulesLegacy from "./components/ModulesLegacy";
+import { AppProvider } from './contexts/AppContext';
 
 const queryClient = new QueryClient();
 
@@ -23,10 +25,22 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route key={"ModuleDetailLegacy"} path="/ModuleDetailLegacy" element={<ModuleDetailLegacy />} />
-              <Route key={"DailyCheckIn"} path="/DailyCheckIn" element={<DailyCheckIn />} />
-              <Route key={"Progress"} path="/Progress" element={<Progress />} />
+              {/* wrap everything that needs the common chrome in AppLayout */}
+              <Route
+                path="/"
+                element={
+                  <AppProvider>
+                    <AppLayout />
+                  </AppProvider>
+                }
+              >
+                {/* index route shows modules list */}
+                <Route index element={<ModulesLegacy />} />
+                <Route path="ModuleDetailLegacy" element={<ModuleDetailLegacy />} />
+                <Route path="DailyCheckIn" element={<DailyCheckIn />} />
+                <Route path="Progress" element={<Progress />} />
+              </Route>
+
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

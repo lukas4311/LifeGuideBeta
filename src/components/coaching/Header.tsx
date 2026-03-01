@@ -40,7 +40,7 @@ const Header: React.FC<HeaderProps> = ({
   // ];
 
   const navItems = [
-    { id: null, name: 'Home', icon: Home, label: 'Domů' },
+    { id: null, name: '', icon: Home, label: 'Domů' },
     // { id: 1, name: 'Modules', icon: BookOpen, label: 'Moduly' },
     // { id: 2, name: 'ModulesLegacy', icon: BookOpen, label: 'Moduly' },
     { id: 3, name: 'DailyCheckIn', icon: Sun, label: 'Denní kontrola' },
@@ -95,7 +95,7 @@ const Header: React.FC<HeaderProps> = ({
           {/* Top navigation */}
         <nav className="w-2/3 backdrop-blur-xl bg-white/70 border-b border-gray-100">
           <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-            <Link to={createPageUrl('Home')} className="flex items-center gap-2">
+            <Link to={createPageUrl('')} className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-amber-400 via-violet-500 to-rose-500 flex items-center justify-center">
                 <Sun className="w-4 h-4 text-white" />
               </div>
