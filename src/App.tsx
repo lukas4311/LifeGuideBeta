@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import ModuleDetailLegacy from "./components/ModuleDetailLegacy";
 import { LanguageProvider, useLanguage } from './components/LanguageContext';
+import DailyCheckIn from "./components/DailyCheckIn";
 
 const queryClient = new QueryClient();
 
@@ -23,6 +24,7 @@ const App = () => (
             <Routes>
               <Route path="/" element={<Index />} />
               <Route key={"ModuleDetailLegacy"} path="/ModuleDetailLegacy" element={<ModuleDetailLegacy />} />
+              <Route key={"DailyCheckIn"} path="/DailyCheckIn" element={<DailyCheckIn />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
