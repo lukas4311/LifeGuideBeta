@@ -10,6 +10,7 @@ import NotFound from "./pages/NotFound";
 import ModuleDetailLegacy from "./components/ModuleDetailLegacy";
 import { LanguageProvider, useLanguage } from './components/LanguageContext';
 import DailyCheckIn from "./components/DailyCheckIn";
+import Progress from "./components/Progress";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
               <Route path="/" element={<Index />} />
               <Route key={"ModuleDetailLegacy"} path="/ModuleDetailLegacy" element={<ModuleDetailLegacy />} />
               <Route key={"DailyCheckIn"} path="/DailyCheckIn" element={<DailyCheckIn />} />
+              <Route key={"Progress"} path="/Progress" element={<Progress />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
