@@ -19,6 +19,24 @@ import { Outlet, useLocation } from 'react-router-dom';
 
 const AppLayout: React.FC = () => {
   const [activeModule, setActiveModule] = useState<number | null>(null);
+  const location = useLocation();
+
+  // keep activeModule in sync with query parameter when user navigates via router links
+  useEffect(() => {
+    if (location.pathname === '/ModuleDetailLegacy') {
+      const params = new URLSearchParams(location.search);
+      const moduleParam = params.get('module');
+      if (moduleParam) {
+        setActiveModule(Number(moduleParam));
+        return;
+      }
+    }
+
+    // reset when returning to root or other pages
+    if (location.pathname === '/') {
+      setActiveModule(null);
+    }
+  }, [location]);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [moduleProgress, setModuleProgress] = useState<Record<number, number>>({
     1: 0, 2: 0, 3: 0, 4: 0, 5: 0,
@@ -209,7 +227,6 @@ const AppLayout: React.FC = () => {
     setShowAuthModal(false);
   };
 
-  const location = useLocation();
   const isRootPath = location.pathname === '/';
 
   const currentModule = activeModule ? modules.find(m => m.id === activeModule) : null;

@@ -1,5 +1,5 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useLocation } from 'react-router-dom';
 import { Compass, Menu, X, User, LogOut, ChevronDown, Shield } from 'lucide-react';
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { Home, BookOpen, BarChart3, Sun, Globe } from 'lucide-react';
@@ -28,6 +28,7 @@ const Header: React.FC<HeaderProps> = ({
   isAdmin = false,
   onAdminClick
 }) => {
+  const location = useLocation();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
 
   // const navItems = [
@@ -105,11 +106,11 @@ const Header: React.FC<HeaderProps> = ({
             <div className="flex items-center gap-1">
               {navItems.map(item => {
                 const Icon = item.icon;
-                const isActive = activeModule === item.id;
-                return (
+                const path = createPageUrl(item.name);
+                const isActive = location.pathname === path;                return (
                   <Link
                     key={item.name}
-                    to={createPageUrl(item.name)}
+                    to={path}
                     className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
                       isActive 
                         ? 'bg-gray-900 text-white shadow-md' 
