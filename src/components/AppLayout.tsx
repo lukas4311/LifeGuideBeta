@@ -56,7 +56,7 @@ const AppLayout: React.FC = () => {
     const checkSession = async () => {
       const { data: { session } } = await supabase.auth.getSession();
       setUser(session?.user ?? null);
-      
+
       // Admin check
       if (session?.user) {
         try {
@@ -70,7 +70,7 @@ const AppLayout: React.FC = () => {
           console.warn('Admin check failed:', error);
         }
       }
-      
+
       setLoadingAuth(false);
     };
 
@@ -79,7 +79,7 @@ const AppLayout: React.FC = () => {
     // ✅ FIXED: Auth listener s timeoutem proti deadlocku
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
-      
+
       if (session?.user) {
         // Odložený admin check
         setTimeout(async () => {
@@ -137,7 +137,7 @@ const AppLayout: React.FC = () => {
         // LocalStorage fallback
         const savedProgress = localStorage.getItem('moduleProgress');
         const savedExercises = localStorage.getItem('completedExercises');
-        
+
         if (savedProgress) setModuleProgress(JSON.parse(savedProgress));
         if (savedExercises) setCompletedExercises(JSON.parse(savedExercises));
       }
@@ -211,14 +211,14 @@ const AppLayout: React.FC = () => {
       setUser(null);
       setIsAdmin(false);
       setShowAdminDashboard(false);
-      
+
       // LocalStorage fallback
       const savedProgress = localStorage.getItem('moduleProgress');
       const savedExercises = localStorage.getItem('completedExercises');
-      
+
       setModuleProgress(savedProgress ? JSON.parse(savedProgress) : { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 });
       setCompletedExercises(savedExercises ? JSON.parse(savedExercises) : { 1: [], 2: [], 3: [], 4: [], 5: [] });
-      
+
       window.location.href = '/';
     }
   };
@@ -234,9 +234,9 @@ const AppLayout: React.FC = () => {
   // Admin dashboard
   if (showAdminDashboard && isAdmin && user) {
     return (
-      <AdminDashboard 
-        user={user} 
-        onBack={() => setShowAdminDashboard(false)} 
+      <AdminDashboard
+        user={user}
+        onBack={() => setShowAdminDashboard(false)}
       />
     );
   }
@@ -244,7 +244,7 @@ const AppLayout: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
-      <Header 
+      <Header
         activeModule={activeModule}
         setActiveModule={(id) => {
           setActiveModule(id);
@@ -260,11 +260,11 @@ const AppLayout: React.FC = () => {
       />
 
       {/* Auth Modal */}
-      <AuthModal 
+      <AuthModal
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onAuthSuccess={handleAuthSuccess}
-      />
+      />      
 
       {/* Main Content */}
       <main className="pt-16 md:pt-20">
@@ -278,7 +278,7 @@ const AppLayout: React.FC = () => {
           </>
         ) : currentModule ? (
           <div className="relative">
-            <ModuleDetail 
+            <ModuleDetail
               module={currentModule}
               onBack={handleBack}
               progress={moduleProgress[currentModule.id] || 0}

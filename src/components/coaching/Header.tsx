@@ -4,6 +4,7 @@ import { Compass, Menu, X, User, LogOut, ChevronDown, Shield } from 'lucide-reac
 import { User as SupabaseUser } from '@supabase/supabase-js';
 import { Home, BookOpen, BarChart3, Sun, Globe } from 'lucide-react';
 import { createPageUrl } from '@/lib/utils';
+import { useLanguage } from '../LanguageContext';
 
 interface HeaderProps {
   activeModule: number | null;
@@ -17,10 +18,10 @@ interface HeaderProps {
   onAdminClick?: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ 
-  activeModule, 
-  setActiveModule, 
-  mobileMenuOpen, 
+const Header: React.FC<HeaderProps> = ({
+  activeModule,
+  setActiveModule,
+  mobileMenuOpen,
   setMobileMenuOpen,
   user,
   onSignInClick,
@@ -30,6 +31,7 @@ const Header: React.FC<HeaderProps> = ({
 }) => {
   const location = useLocation();
   const [showUserMenu, setShowUserMenu] = React.useState(false);
+  const { t, toggleLanguage, lang } = useLanguage();
 
   // const navItems = [
   //   { id: null, label: 'Domů' },
@@ -94,45 +96,44 @@ const Header: React.FC<HeaderProps> = ({
           </nav> */}
 
           {/* Top navigation */}
-        <nav className="w-2/3 backdrop-blur-xl bg-white/70 border-b border-gray-100">
-          <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
-            <Link to={createPageUrl('')} className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-amber-400 via-violet-500 to-rose-500 flex items-center justify-center">
-                <Sun className="w-4 h-4 text-white" />
-              </div>
-              <span className="font-bold text-gray-900 hidden sm:block text-sm tracking-wide">ŘIDIČÁK NA ŽIVOT</span>
-            </Link>
+          <nav className="w-2/3 backdrop-blur-xl bg-white/70 border-b border-gray-100">
+            <div className="max-w-7xl mx-auto px-4 h-20 flex items-center justify-between">
+              <Link to={createPageUrl('')} className="flex items-center gap-2">
+                <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-amber-400 via-violet-500 to-rose-500 flex items-center justify-center">
+                  <Sun className="w-4 h-4 text-white" />
+                </div>
+                <span className="font-bold text-gray-900 hidden sm:block text-sm tracking-wide">ŘIDIČÁK NA ŽIVOT</span>
+              </Link>
 
-            <div className="flex items-center gap-1">
-              {navItems.map(item => {
-                const Icon = item.icon;
-                const path = createPageUrl(item.name);
-                const isActive = location.pathname === path;                return (
-                  <Link
-                    key={item.name}
-                    to={path}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
-                      isActive 
-                        ? 'bg-gray-900 text-white shadow-md' 
+              <div className="flex items-center gap-1">
+                {navItems.map(item => {
+                  const Icon = item.icon;
+                  const path = createPageUrl(item.name);
+                  const isActive = location.pathname === path; return (
+                    <Link
+                      key={item.name}
+                      to={path}
+                      className={`flex items-center gap-2 px-3 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
+                        ? 'bg-gray-900 text-white shadow-md'
                         : 'text-gray-500 hover:text-gray-900 hover:bg-gray-100'
-                    }`}
-                  >
-                    <Icon className="w-4 h-4" />
-                    <span className="hidden md:inline">{item.label}</span>
-                  </Link>
-                );
-              })}
-              
-              {/* <button
+                        }`}
+                    >
+                      <Icon className="w-4 h-4" />
+                      <span className="hidden md:inline">{item.label}</span>
+                    </Link>
+                  );
+                })}
+
+                {/* <button
                 onClick={toggleLanguage}
                 className="ml-2 flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 border border-gray-200"
               >
                 <Globe className="w-4 h-4" />
                 <span>{t('switchLang')}</span>
               </button> */}
+              </div>
             </div>
-          </div>
-        </nav>
+          </nav>
 
           {/* Auth & CTA Buttons */}
           <div className="hidden md:flex items-center gap-3 ml-auto">
@@ -159,7 +160,7 @@ const Header: React.FC<HeaderProps> = ({
                 {/* User Dropdown Menu */}
                 {showUserMenu && (
                   <>
-                    <div 
+                    <div
                       className="fixed inset-0 z-10"
                       onClick={() => setShowUserMenu(false)}
                     />
@@ -203,7 +204,15 @@ const Header: React.FC<HeaderProps> = ({
                 Přihlásit se
               </button>
             )}
-            
+
+            <button
+              onClick={toggleLanguage}
+              className="ml-2 flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-all duration-200 border border-gray-200"
+            >
+              <Globe className="w-4 h-4" />
+              <span>{t('switchLang')}</span>
+            </button>
+
             {/* <a 
               href="https://www.veranekvindova.cz" 
               target="_blank" 
@@ -260,16 +269,15 @@ const Header: React.FC<HeaderProps> = ({
                     setActiveModule(item.id);
                     setMobileMenuOpen(false);
                   }}
-                  className={`px-4 py-3 rounded-lg text-left font-medium transition-all duration-200 ${
-                    activeModule === item.id
-                      ? 'bg-purple-600 text-white'
-                      : 'text-gray-600 hover:bg-purple-50'
-                  }`}
+                  className={`px-4 py-3 rounded-lg text-left font-medium transition-all duration-200 ${activeModule === item.id
+                    ? 'bg-purple-600 text-white'
+                    : 'text-gray-600 hover:bg-purple-50'
+                    }`}
                 >
                   {item.label}
                 </button>
               ))}
-              
+
               {user ? (
                 <>
                   {isAdmin && onAdminClick && (
@@ -307,10 +315,10 @@ const Header: React.FC<HeaderProps> = ({
                   Přihlásit se
                 </button>
               )}
-              
-              <a 
-                href="https://www.veranekvindova.cz" 
-                target="_blank" 
+
+              <a
+                href="https://www.veranekvindova.cz"
+                target="_blank"
                 rel="noopener noreferrer"
                 className="mt-2 px-4 py-3 bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-800 rounded-lg font-semibold text-center"
               >
