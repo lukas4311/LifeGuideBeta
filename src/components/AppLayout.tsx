@@ -264,39 +264,39 @@ const AppLayout: React.FC = () => {
         isOpen={showAuthModal}
         onClose={() => setShowAuthModal(false)}
         onAuthSuccess={handleAuthSuccess}
-      />      
+      />
 
       {/* Main Content */}
       <main className="pt-16 md:pt-20">
-        {activeModule === null ? (
-          <>
-            {isRootPath && <Hero onStartJourney={handleStartJourney} />}
-            {/* render whatever route is active */}
-            <Outlet />
-            {isRootPath && <Testimonials />}
-            {isRootPath && <ContactSection />}
-          </>
-        ) : currentModule ? (
-          <div className="relative">
-            <ModuleDetail
+
+        <>
+          {isRootPath && <Hero onStartJourney={handleStartJourney} />}
+          {/* render whatever route is active */}
+          <Outlet />
+          {isRootPath && <Testimonials />}
+          {isRootPath && <ContactSection />}
+        </>
+
+        <div className="relative">
+          {/* <ModuleDetail
               module={currentModule}
               onBack={handleBack}
               progress={moduleProgress[currentModule.id] || 0}
               onProgressUpdate={handleProgressUpdate}
               completedExercises={completedExercises[currentModule.id] || []}
               onExerciseComplete={handleExerciseComplete}
-            />
+            /> */}
 
-            {/* Module-specific content */}
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12" style={{ backgroundColor: currentModule.bgColor }}>
+          {/* Module-specific content */}
+          {/* <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12" style={{ backgroundColor: currentModule.bgColor }}>
               {currentModule.id === 1 && <IdentityQuiz />}
               {currentModule.id === 3 && <MindsetComparison />}
               {currentModule.id === 4 && <EnergyTracker />}
               {currentModule.id === 5 && <GratitudeJournal user={user} />}
-            </div>
+            </div> */}
 
-            {/* Navigation */}
-            <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12" style={{ backgroundColor: currentModule.bgColor }}>
+          {/* Navigation */}
+          {/* <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 pb-12" style={{ backgroundColor: currentModule.bgColor }}>
               <div className="flex justify-between items-center">
                 {currentModule.id > 1 && (
                   <button
@@ -316,9 +316,9 @@ const AppLayout: React.FC = () => {
                   </button>
                 )}
               </div>
-            </div>
-          </div>
-        ) : null}
+            </div> */}
+        </div>
+
       </main>
 
       <Footer />
