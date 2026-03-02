@@ -71,7 +71,16 @@ import { createPageUrl } from '@/lib/utils';
             transition={{ duration: 0.8, delay: 0.6 }}
             className="flex flex-col sm:flex-row gap-4 justify-center mb-16"
           >
-            <Link to={createPageUrl('Modules')}>
+            {/* scroll-only link to modules section on the home page */}
+            <Link
+              to="/#modules"
+              onClick={() => {
+                if (window.location.pathname === '/') {
+                  const el = document.getElementById('modules');
+                  if (el) el.scrollIntoView({ behavior: 'smooth' });
+                }
+              }}
+            >
               <Button size="lg" className="bg-gradient-to-r from-amber-500 via-violet-500 to-rose-500 hover:from-amber-600 hover:via-violet-600 hover:to-rose-600 text-white px-8 py-6 text-lg rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300">
                 {t('startJourney')}
                 <ArrowRight className="w-5 h-5 ml-2" />
