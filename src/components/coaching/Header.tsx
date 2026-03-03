@@ -43,11 +43,11 @@ const Header: React.FC<HeaderProps> = ({
   // ];
 
   const navItems = [
-    { id: null, name: '', icon: Home, label: 'Domů' },
+    { id: null, name: '', icon: Home, label: t('home') },
     // { id: 1, name: 'Modules', icon: BookOpen, label: 'Moduly' },
     // { id: 2, name: 'ModulesLegacy', icon: BookOpen, label: 'Moduly' },
-    { id: 3, name: 'DailyCheckIn', icon: Sun, label: 'Denní kontrola' },
-    { id: 4, name: 'Progress', icon: BarChart3, label: 'Pokrok' },
+    { id: 3, name: 'DailyCheckIn', icon: Sun, label: t('dailyCheckIn') },
+    { id: 4, name: 'Progress', icon: BarChart3, label: t('progress') },
   ];
 
   const getUserDisplayName = () => {
@@ -102,7 +102,7 @@ const Header: React.FC<HeaderProps> = ({
                 <div className="w-8 h-8 rounded-xl bg-gradient-to-r from-amber-400 via-violet-500 to-rose-500 flex items-center justify-center">
                   <Sun className="w-4 h-4 text-white" />
                 </div>
-                <span className="font-bold text-gray-900 hidden sm:block text-sm tracking-wide">ŘIDIČÁK NA ŽIVOT</span>
+                <span className="font-bold text-gray-900 hidden sm:block text-sm tracking-wide">{t('welcomeTitle')}</span>
               </Link>
 
               <div className="flex items-center gap-1">

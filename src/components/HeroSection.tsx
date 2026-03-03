@@ -86,11 +86,11 @@ import { createPageUrl } from '@/lib/utils';
                 <ArrowRight className="w-5 h-5 ml-2" />
               </Button>
             </Link>
-            <Link to={createPageUrl('Modules')}>
+            {/* <Link to={createPageUrl('Modules')}>
               <Button size="lg" variant="outline" className="px-8 py-6 text-lg rounded-2xl border-2 hover:bg-white/60 transition-all duration-300">
                 {t('exploreModules')}
               </Button>
-            </Link>
+            </Link> */}
           </motion.div>
 
           {/* Stats */}
