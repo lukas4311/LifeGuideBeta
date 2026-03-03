@@ -1,64 +1,85 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-// import { base44 } from '@/api/base44Client';
 import { useLanguage } from './LanguageContext';
-import { getModulesLegacy, getModulesFromSupabase } from './ModulesDataLegacy';
+import { getModulesFromSupabase } from './ModulesDataLegacy';
 import LessonContentLegacy from './LessonContentLegacy';
-import { CheckCircle2, Circle } from 'lucide-react';
+import { CheckCircle2, Circle, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { createPageUrl } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
 import { progressService } from '@/lib/progress';
+import { supabase } from '@/lib/supabase';
+
+type ModuleSource = {
+  id: number;
+  module_id: number;
+  source_type: 'book' | 'video' | 'article' | 'podcast' | 'other';
+  title: string;
+  description: string | null;
+  url: string | null;
+  author: string | null;
+  meta: any;
+  order_index: number;
+  image_url?: string;
+  thumbnail_url?: string;
+};
 
 export default function ModuleDetailLegacy() {
   const { t } = useLanguage();
-  const [modules, setModules] = useState([]);
-  const [module, setModule] = useState(null); // null místo undefined
+  const [modules, setModules] = useState<any[]>([]);
+  const [module, setModule] = useState<any | null>(null);
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
-  const [progress, setProgress] = useState([]);
+  const [progress, setProgress] = useState<any[]>([]);
+  const [sources, setSources] = useState<ModuleSource[]>([]);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
 
   const urlParams = new URLSearchParams(window.location.search);
-  const moduleId = parseInt(urlParams.get('module') || '1');
+  const moduleId = parseInt(urlParams.get('module') || '1', 10);
 
-  // 🔧 FIX: Funkce pro načtení všech dat
   const loadData = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('🔄 Načítám modul:', moduleId);
-
-      const [fetchedModules, progressData] = await Promise.all([
+      const [fetchedModules, progressData, moduleSources] = await Promise.all([
         getModulesFromSupabase(t),
         progressService.getModuleProgress(moduleId),
+        supabase
+          .from('module_sources')
+          .select('*')
+          .eq('module_id', moduleId)
+          .order('order_index', { ascending: true }),
       ]);
-
-      console.log('📚 Moduly:', fetchedModules.length);
-      console.log('📊 Progress:', progressData);
 
       setModules(fetchedModules);
       setProgress(progressData);
 
-      const foundModule = fetchedModules.find((m) => m.id === moduleId);
+      if (moduleSources.error) {
+        console.error('Error loading module sources:', moduleSources.error);
+        setSources([]);
+      } else {
+        setSources(moduleSources.data || []);
+      }
+
+      const foundModule = fetchedModules.find((m: any) => m.id === moduleId);
       if (foundModule) {
         setModule(foundModule);
         setCurrentLessonIndex(0);
       } else {
-        console.warn('❌ Modul nenalezen:', moduleId);
         setModule(null);
       }
     } catch (error) {
-      console.error('💥 loadData error:', error);
+      console.error('Chyba:', error);
+      setModule(null);
+      setSources([]);
     } finally {
       setLoading(false);
     }
   }, [moduleId, t]);
 
-  // 🔧 FIX: Spusť načítání při změně moduleId
   useEffect(() => {
     loadData();
   }, [loadData]);
 
-  // 🔧 FIX: Loading state pokrývá i "module not found"
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -67,7 +88,6 @@ export default function ModuleDetailLegacy() {
     );
   }
 
-  // 🔧 FIX: Jednodušší check
   if (!module) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -85,37 +105,41 @@ export default function ModuleDetailLegacy() {
   const Icon = module.icon;
   const currentLesson = module.lessons[currentLessonIndex];
   const currentProgress = currentLesson
-    ? progress.find((p) => p.lesson_key === currentLesson.id)  // ✅ lesson_key místo lesson_id
+    ? progress.find((p: any) => p.lesson_key === currentLesson.id)
     : null;
 
-  const handleSaveProgress = async (data) => {
+  const handleSaveProgress = async (data: any) => {
     if (!currentLesson) return;
 
     try {
       const saved = await progressService.saveLessonProgress({
         moduleId,
-        lessonId: currentLesson.id,  // 'l1' – OK
+        lessonId: currentLesson.id,
         reflection_text: data.reflection_text,
         energy_rating: data.energy_rating,
         completed: data.completed,
       });
 
-      console.log('✅ Uloženo:', saved); // Debug
-
-      // ✅ FIX: Použij lesson_key pro matching
-      setProgress((prev) =>
-        prev.find((p) => p.lesson_key === currentLesson.id)
-          ? prev.map((p) =>
-            p.lesson_key === currentLesson.id ? { ...saved } : p
-          )
+      setProgress(prev =>
+        prev.find((p: any) => p.lesson_key === currentLesson.id)
+          ? prev.map((p: any) =>
+              p.lesson_key === currentLesson.id ? { ...saved } : p
+            )
           : [...prev, saved]
       );
     } catch (error) {
-      console.error('❌ Chyba ukládání:', error);
+      console.error('Chyba ukládání progressu:', error);
     }
   };
 
-  // ... zbytek komponenty zůstává STEJNÝ (header, sidebar, LessonContentLegacy)
+  const openImageModal = (imageUrl: string) => {
+    setSelectedImage(imageUrl);
+  };
+
+  const closeImageModal = () => {
+    setSelectedImage(null);
+  };
+
   return (
     <div className="min-h-screen">
       {/* Module header */}
@@ -126,7 +150,9 @@ export default function ModuleDetailLegacy() {
             alt={t(module.titleKey)}
             className="w-full h-full object-cover"
           />
-          <div className={`absolute inset-0 bg-gradient-to-t ${module.color} opacity-70`} />
+          <div
+            className={`absolute inset-0 bg-gradient-to-t ${module.color} opacity-70`}
+          />
           <div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 
           <div className="absolute bottom-0 left-0 right-0 p-6 md:p-10">
@@ -136,11 +162,17 @@ export default function ModuleDetailLegacy() {
                   <Icon className="w-6 h-6 text-white" />
                 </div>
                 <div>
-                  <p className="text-xs text-white/70 font-medium uppercase tracking-wider">{t('module')} {module.id} (Legacy)</p>
-                  <h1 className="text-3xl md:text-4xl font-bold text-white">{t(module.titleKey)}</h1>
+                  <p className="text-xs text-white/70 font-medium uppercase tracking-wider">
+                    {t('module')} {module.id} (Legacy)
+                  </p>
+                  <h1 className="text-3xl md:text-4xl font-bold text-white">
+                    {t(module.titleKey)}
+                  </h1>
                 </div>
               </div>
-              <p className="text-white/80 text-sm md:text-base max-w-xl">{t(module.subtitleKey)}</p>
+              <p className="text-white/80 text-sm md:text-base max-w-xl">
+                {t(module.subtitleKey)}
+              </p>
             </div>
           </div>
         </div>
@@ -151,10 +183,14 @@ export default function ModuleDetailLegacy() {
           {/* Lesson sidebar */}
           <div className="lg:w-64 flex-shrink-0">
             <div className="lg:sticky lg:top-24">
-              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">{t('lessons')}</h3>
+              <h3 className="text-sm font-bold uppercase tracking-wider text-gray-400 mb-4">
+                {t('lessons')}
+              </h3>
               <div className="flex lg:flex-col gap-2 overflow-x-auto lg:overflow-visible pb-2 lg:pb-0">
-                {module.lessons.map((lesson, index) => {
-                  const lessonProgress = progress.find(p => p.lesson_id === lesson.id);
+                {module.lessons.map((lesson: any, index: number) => {
+                  const lessonProgress = progress.find(
+                    (p: any) => p.lesson_id === lesson.id
+                  );
                   const isActive = index === currentLessonIndex;
                   const isDone = lessonProgress?.completed;
 
@@ -162,17 +198,26 @@ export default function ModuleDetailLegacy() {
                     <button
                       key={lesson.id}
                       onClick={() => setCurrentLessonIndex(index)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all duration-200 whitespace-nowrap lg:whitespace-normal min-w-fit ${isActive
-                        ? `bg-white shadow-md border ${module.borderColor}`
-                        : 'hover:bg-gray-50'
-                        }`}
+                      className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-left transition-all duration-200 whitespace-nowrap lg:whitespace-normal min-w-fit ${
+                        isActive
+                          ? `bg-white shadow-md border ${module.borderColor}`
+                          : 'hover:bg-gray-50'
+                      }`}
                     >
                       {isDone ? (
                         <CheckCircle2 className="w-5 h-5 text-green-500 flex-shrink-0" />
                       ) : (
-                        <Circle className={`w-5 h-5 flex-shrink-0 ${isActive ? module.textColor : 'text-gray-300'}`} />
+                        <Circle
+                          className={`w-5 h-5 flex-shrink-0 ${
+                            isActive ? module.textColor : 'text-gray-300'
+                          }`}
+                        />
                       )}
-                      <span className={`text-sm font-medium ${isActive ? 'text-gray-900' : 'text-gray-500'}`}>
+                      <span
+                        className={`text-sm font-medium ${
+                          isActive ? 'text-gray-900' : 'text-gray-500'
+                        }`}
+                      >
                         {t(lesson.titleKey)}
                       </span>
                     </button>
@@ -182,7 +227,10 @@ export default function ModuleDetailLegacy() {
 
               <div className="mt-6 hidden lg:block">
                 <Link to={createPageUrl('ModulesLegacy')}>
-                  <Button variant="ghost" className="w-full rounded-xl text-gray-500">
+                  <Button
+                    variant="ghost"
+                    className="w-full rounded-xl text-gray-500"
+                  >
                     ← {t('modules')} (Legacy)
                   </Button>
                 </Link>
@@ -190,8 +238,9 @@ export default function ModuleDetailLegacy() {
             </div>
           </div>
 
-          {/* Lesson content */}
-          <div className="flex-1">
+          {/* Lesson + sources column */}
+          <div className="flex-1 space-y-8">
+            {/* Lesson content */}
             {currentLesson ? (
               <LessonContentLegacy
                 key={currentLesson.id}
@@ -201,8 +250,14 @@ export default function ModuleDetailLegacy() {
                 moduleAccent={module.accentColor}
                 progressData={currentProgress}
                 onSaveProgress={handleSaveProgress}
-                onNext={() => setCurrentLessonIndex(Math.min(currentLessonIndex + 1, module.lessons.length - 1))}
-                onPrevious={() => setCurrentLessonIndex(Math.max(currentLessonIndex - 1, 0))}
+                onNext={() =>
+                  setCurrentLessonIndex(
+                    Math.min(currentLessonIndex + 1, module.lessons.length - 1)
+                  )
+                }
+                onPrevious={() =>
+                  setCurrentLessonIndex(Math.max(currentLessonIndex - 1, 0))
+                }
                 isFirst={currentLessonIndex === 0}
                 isLast={currentLessonIndex === module.lessons.length - 1}
                 lessonIndex={currentLessonIndex}
@@ -213,9 +268,166 @@ export default function ModuleDetailLegacy() {
                 <p className="text-gray-500">Tento modul nemá žádné lekce.</p>
               </div>
             )}
+
+            {/* Extra sources section */}
+            {sources.length > 0 && (
+              <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
+                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                  <ExternalLink className="w-5 h-5 text-gray-500" />
+                  {t('extraResources') || 'Další zdroje'}
+                </h3>
+
+                <div className="space-y-4">
+                  {sources.map((src: ModuleSource) => {
+                    const hasImage = src.image_url || src.thumbnail_url;
+
+                    return (
+                      <div
+                        key={src.id}
+                        className="p-3 rounded-2xl hover:bg-gray-50 transition-colors group cursor-default"
+                      >
+                        <div
+                          className={`flex ${
+                            hasImage ? 'items-start' : 'items-center'
+                          } gap-3`}
+                        >
+                          {/* Left side: text + optional image */}
+                          <div className="flex-1">
+                            {hasImage && (
+                              <div
+                                className="mb-2 w-16 h-16 rounded-xl overflow-hidden bg-gray-100 cursor-pointer flex-shrink-0 group-hover:shadow-md group-hover:scale-[1.05] transition-all"
+                                onClick={() =>
+                                  openImageModal(
+                                    src.image_url ||
+                                      src.thumbnail_url ||
+                                      ''
+                                  )
+                                }
+                              >
+                                <img
+                                  src={src.thumbnail_url || src.image_url}
+                                  alt={src.title}
+                                  className="w-full h-full object-cover"
+                                  loading="lazy"
+                                />
+                              </div>
+                            )}
+
+                            <h4 className="font-semibold text-gray-900 mb-1">
+                              {src.url ? (
+                                <a
+                                  href={src.url}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                  className="hover:text-violet-700 transition-colors hover:underline"
+                                >
+                                  {src.title}
+                                </a>
+                              ) : (
+                                src.title
+                              )}
+                            </h4>
+
+                            {src.author && (
+                              <p className="text-sm text-gray-500 mb-1">
+                                {src.author}
+                              </p>
+                            )}
+                            {src.description && (
+                              <p className="text-sm text-gray-600">
+                                {src.description}
+                              </p>
+                            )}
+                          </div>
+
+                          {/* Tag + externí odkaz */}
+                          <div className="flex-shrink-0 flex flex-col gap-1 items-end">
+                            {src.source_type === 'book' && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
+                                {t('book') || 'Kniha'}
+                              </span>
+                            )}
+                            {src.source_type === 'video' && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-700">
+                                {t('video') || 'Video'}
+                              </span>
+                            )}
+                            {src.source_type === 'article' && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
+                                {t('article') || 'Článek'}
+                              </span>
+                            )}
+                            {src.source_type === 'podcast' && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-violet-50 text-violet-700">
+                                {t('podcast') || 'Podcast'}
+                              </span>
+                            )}
+                            {src.source_type === 'other' && (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-gray-50 text-gray-600">
+                                {t('resource') || 'Zdroj'}
+                              </span>
+                            )}
+
+                            {/* {src.url && (
+                              <a
+                                href={src.url}
+                                target="_blank"
+                                rel="noreferrer"
+                                className="text-blue-500 hover:text-blue-700 text-xs transition-colors"
+                              >
+                                {t('open') || 'Otevřít →'}
+                              </a>
+                            )} */}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </section>
+            )}
           </div>
         </div>
       </div>
+
+      {/* Modal pro zvětšený obrázek */}
+      {selectedImage && (
+        <div
+          className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4"
+          onClick={closeImageModal}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="max-w-4xl max-h-[90vh] w-full h-full relative"
+          >
+            <img
+              src={selectedImage}
+              alt="Zvětšený obrázek"
+              className="w-full h-full max-w-full max-h-full object-contain rounded-lg shadow-2xl"
+            />
+            <button
+              onClick={closeImageModal}
+              className="absolute top-4 right-4 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center text-gray-800 shadow-lg backdrop-blur-sm"
+            >
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          </motion.div>
+        </div>
+      )}
     </div>
   );
 }
