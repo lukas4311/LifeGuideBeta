@@ -9,7 +9,7 @@ const translations = {
     modules: "Modules",
     progress: "My Journey",
     dailyCheckIn: "Daily Check-in",
-    
+
     // Home
     welcomeTitle: "Driving Licence for Life",
     welcomeSubtitle: "For Your Fulfilled Life",
@@ -24,7 +24,7 @@ const translations = {
     courseDescription: "5 Transformational Modules",
     courseSubDescription: "Your Path to a Fulfilled Life",
     courseDetailText: "Each module guides you through key areas of personal growth. Progress at your own pace and discover your potential.",
-    
+
     // Energy Check-in
     howAreYou: "How is your energy today?",
     energyLevel: "Energy Level",
@@ -37,7 +37,7 @@ const translations = {
     addNote: "Add a reflection...",
     saveCheckIn: "Save Check-in",
     checkInSaved: "Check-in saved!",
-    
+
     // Modules
     module: "Module",
     modulesTitle: "5 Transformational Modules",
@@ -47,7 +47,8 @@ const translations = {
     completed: "Completed",
     startModule: "Begin Module",
     continueModule: "Continue",
-    
+    extraResources: "Resources",
+
     // Module 1
     m1Title: "Identity",
     m1Subtitle: "Remember Who You Truly Are",
@@ -88,12 +89,12 @@ const translations = {
     fingerRingRule: "The quality of your life corresponds to the quality of your relationships. Improve your communication and compassion skills and you will improve your life.",
     fingerPinky: "Pinky - Here and Now",
     fingerPinkyRule: "Joy and gratitude from little things. Rejoice in every HERE AND NOW. Be grateful. Focus your attention on what is good. Sow good deeds and thoughts and good will return to you.",
-    
+
     // Hand exercise
     handTitle: "Rules of One Hand",
     handIntro: "Don't want to crash in life? Learn the rules. Heart on your palm.",
     handDescription: "The rules of one hand will help you navigate life with wisdom and love. Each finger represents a key principle for a fulfilled life.",
-    
+
     // Thumb
     thumbTitle: "Everything is Good",
     thumbPrinciple: "Nothing happens by chance. Every situation has its meaning. I can resist, or accept and understand.",
@@ -104,7 +105,7 @@ const translations = {
     thumbExercise: "Write one current situation that is hard for you to accept:",
     thumbButton: "I choose to see it differently",
     thumbAffirmation: "Maybe it's not against me. Maybe it's for me.",
-    
+
     // Index
     indexTitle: "Responsibility",
     indexPrinciple: "I always point only at myself. I accept my share of responsibility for everything that happens in my life.",
@@ -114,7 +115,7 @@ const translations = {
     indexQ3: "What can I change?",
     indexExercise: "Write one sentence starting with: 'I accept responsibility for...'",
     indexAffirmation: "By this, I take power back into my own hands.",
-    
+
     // Middle
     middleTitle: "Mission",
     middlePrinciple: "I was born with talent. I have my place and function in the world.",
@@ -127,7 +128,7 @@ const translations = {
     middleTalent2: "Talent 2",
     middleTalent3: "Talent 3",
     middleAffirmation: "When I develop my talents, the world is richer. I feel the meaningfulness of my life.",
-    
+
     // Ring
     ringTitle: "Relationships",
     ringPrinciple: "The quality of my relationships determines the quality of my life. Who I spend time with, I become.",
@@ -145,7 +146,7 @@ const translations = {
     ringOption3: "I will express gratitude",
     ringOption4: "I will take care of my needs",
     ringAffirmation: "Love begins with me.",
-    
+
     // Pinky
     pinkyTitle: "Here and Now",
     pinkyPrinciple: "The most important moment is this one.",
@@ -158,7 +159,7 @@ const translations = {
     pinkyStep2: "2. Exhale",
     pinkyStep3: "3. Notice one detail around you",
     pinkyAffirmation: "This moment is a gift. I appreciate it.",
-    
+
     // Heart
     heartTitle: "AUTHENTICITY",
     heartIntro: "Remember who you truly are. Forget who you think you should be. And who you learned to be to survive in the world.",
@@ -173,7 +174,7 @@ const translations = {
     heartQ6: "What would I do if it didn't feel awkward?",
     heartExercise: "Write one truthful sentence about yourself that you don't usually say:",
     heartAffirmation: "Authenticity is the courage to be real.",
-    
+
     // Common
     saveAnswer: "Save",
     answerSaved: "Answer saved",
@@ -295,7 +296,7 @@ const translations = {
     next: "Next",
     previous: "Previous",
     complete: "Mark Complete",
-    
+
     // Progress
     overallProgress: "Overall Progress",
     modulesCompleted: "Modules Completed",
@@ -304,7 +305,7 @@ const translations = {
     days: "days",
     energyTrend: "Energy Trend",
     yourJourney: "Your Transformation Journey",
-    
+
     // Language
     language: "Language",
     switchLang: "Čeština",
@@ -381,14 +382,32 @@ const translations = {
     fm_continue: "Continue",
     fm_back: "Back",
     fm_saving: "Saving...",
-    },
+
+    // Daily questionnaire
+    dailyQuestionnaireTitle: "Daily Reflection",
+    dailyQuestionnaireSubtitle: "Take a moment to reflect on your day",
+
+    question1: "What am I most grateful for today?",
+    question2: "What made me happiest today?",
+    question3: "Who did I make happy today?",
+    question4: "What did I enjoy most today?",
+    question5Energy: "How was my energy today?",
+    question5Happiness: "How happy was I today?",
+
+    back: "Back",
+    next: "Next",
+    submit: "Submit",
+    writeHere: "Write your answer here...",
+    thankYou: "Thank you!",
+    startJourney: "Start your journey",
+  },
   cs: {
     // Navigation
     home: "Domů",
     modules: "Moduly",
     progress: "Moje cesta",
     dailyCheckIn: "Denní check-in",
-    
+
     // Home
     welcomeTitle: "Řidičák na život",
     welcomeSubtitle: "Pro váš spokojený život",
@@ -403,7 +422,7 @@ const translations = {
     courseDescription: "5 transformačních modulů",
     courseSubDescription: "Tvá cesta k spokojenému životu",
     courseDetailText: "Každý modul tě provede klíčovými oblastmi osobního růstu. Postupuj vlastním tempem a objevuj svůj potenciál.",
-    
+
     // Energy Check-in
     howAreYou: "Jaká je dnes tvoje energie?",
     energyLevel: "Úroveň energie",
@@ -416,7 +435,7 @@ const translations = {
     addNote: "Přidej reflexi...",
     saveCheckIn: "Uložit check-in",
     checkInSaved: "Check-in uložen!",
-    
+
     // Modules
     module: "Modul",
     modulesTitle: "5 transformačních modulů",
@@ -426,7 +445,8 @@ const translations = {
     completed: "Dokončeno",
     startModule: "Začít modul",
     continueModule: "Pokračovat",
-    
+    extraResources: "Zdroje",
+
     // Module 1
     m1Title: "Identita",
     m1Subtitle: "Vzpomeň si, kdo opravdu jsi",
@@ -467,12 +487,12 @@ const translations = {
     fingerRingRule: "Kvalita tvého života odpovídá kvalitě tvých vztahů. Zlepši dovednost komunikace a soucitu a zlepšíš svůj život.",
     fingerPinky: "Malíček - Tady a teď",
     fingerPinkyRule: "Radost a vděčnost z maličkostí. Raduj se v každém TADY A TEĎ. Buď vděčný. Zaměřuj pozornost na to, co je dobré. Raduj se člověče z dobré úrody. Sej dobré činy a myšlenky a dobro se Ti vrátí.",
-    
+
     // Hand exercise
     handTitle: "Pravidla jedné ruky",
     handIntro: "Nechceš v životě bourat? Nauč se pravidla. Srdce na dlani.",
     handDescription: "Pravidla jedné ruky ti pomohou navigovat životem s moudrostí a láskou. Každý prst představuje klíčový princip pro spokojený život.",
-    
+
     // Thumb
     thumbTitle: "Vše je dobré",
     thumbPrinciple: "Nic se neděje náhodou. Každá situace má svůj význam. Mohu odporovat, nebo přijmout a porozumět.",
@@ -483,7 +503,7 @@ const translations = {
     thumbExercise: "Napiš jednu aktuální situaci, kterou je pro tebe těžké přijmout:",
     thumbButton: "Rozhoduji se to vidět jinak",
     thumbAffirmation: "Možná to není proti mně. Možná je to pro mě.",
-    
+
     // Index
     indexTitle: "Zodpovědnost",
     indexPrinciple: "Ukazuji vždy jen na sebe. Přijímám svůj díl odpovědnosti za vše, co se v mém životě děje.",
@@ -493,7 +513,7 @@ const translations = {
     indexQ3: "Co mohu změnit já?",
     indexExercise: "Napiš jednu větu začínající: 'Přijímám odpovědnost za...'",
     indexAffirmation: "Tímto přebírám sílu zpět do svých rukou.",
-    
+
     // Middle
     middleTitle: "Poslání",
     middlePrinciple: "Narodil/a jsem se s talentem. Mám na světě své místo a svou funkci.",
@@ -506,7 +526,7 @@ const translations = {
     middleTalent2: "Talent 2",
     middleTalent3: "Talent 3",
     middleAffirmation: "Když rozvíjím své talenty, svět je bohatší. Vnímám smysluplnost svého života.",
-    
+
     // Ring
     ringTitle: "Vztahy",
     ringPrinciple: "Kvalita mých vztahů určuje kvalitu mého života. S kým se stýkám, tím se stávám.",
@@ -524,7 +544,7 @@ const translations = {
     ringOption3: "Vyjádřím vděčnost",
     ringOption4: "Postarám se o své potřeby",
     ringAffirmation: "Láska začíná u mě.",
-    
+
     // Pinky
     pinkyTitle: "Tady a teď",
     pinkyPrinciple: "Nejdůležitější okamžik je tento.",
@@ -537,7 +557,7 @@ const translations = {
     pinkyStep2: "2. Výdech",
     pinkyStep3: "3. Všimni si jednoho detailu kolem sebe",
     pinkyAffirmation: "Tento okamžik je dar. Oceňuji ho.",
-    
+
     // Heart
     heartTitle: "AUTENTICITA",
     heartIntro: "Vzpomeň si, kdo opravdy jsi. Zapomeň, kdo si myslíš, že máš být. A kdo ses naučil být, abys ve světě obstál.",
@@ -552,7 +572,7 @@ const translations = {
     heartQ6: "Co bych udělal/a, kdyby mi to nebylo blbý?",
     heartExercise: "Napiš jednu pravdivou větu o sobě, kterou běžně neříkáš:",
     heartAffirmation: "Autenticita je odvaha být skutečný/á.",
-    
+
     // Common
     saveAnswer: "Uložit",
     answerSaved: "Odpověď uložena",
@@ -674,7 +694,7 @@ const translations = {
     next: "Další",
     previous: "Předchozí",
     complete: "Označit jako dokončené",
-    
+
     // Progress
     overallProgress: "Celkový pokrok",
     modulesCompleted: "Dokončené moduly",
@@ -683,7 +703,7 @@ const translations = {
     days: "dní",
     energyTrend: "Trend energie",
     yourJourney: "Tvoje cesta proměny",
-    
+
     // Language
     language: "Jazyk",
     switchLang: "English",
@@ -760,8 +780,26 @@ const translations = {
     fm_continue: "Pokračovat",
     fm_back: "Zpět",
     fm_saving: "Ukládám...",
-    }
-    };
+
+    // Daily questionnaire
+    dailyQuestionnaireTitle: "Denní reflexe",
+    dailyQuestionnaireSubtitle: "Věnuj chvíli reflexi svého dne",
+
+    question1: "Za co jsem dnes nejvíc vděčný/á?",
+    question2: "Co mě dnes nejvíc potěšilo?",
+    question3: "Koho jsem dnes potěšil/a já?",
+    question4: "Co mě dnes nejvíc bavilo?",
+    question5Energy: "Jaká byla dnes moje energie?",
+    question5Happiness: "Jak jsem dnes šťastný/šťastná?",
+
+    back: "Zpět",
+    next: "Další",
+    submit: "Odeslat",
+    writeHere: "Napiš svou odpověď sem...",
+    thankYou: "Děkuji!",
+    startJourney: "Začít cestu",
+  }
+};
 
 export function LanguageProvider({ children }) {
   const [lang, setLang] = useState(() => {

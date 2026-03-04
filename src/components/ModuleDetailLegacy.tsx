@@ -5,27 +5,29 @@ import { getModulesFromSupabase } from './ModulesDataLegacy';
 import LessonContentLegacy from './LessonContentLegacy';
 import { CheckCircle2, Circle, ExternalLink } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { createPageUrl } from '@/lib/utils';
+import { createPageUrl, getSourceTexts } from '@/lib/utils';
 import { Button } from "@/components/ui/button";
 import { progressService } from '@/lib/progress';
 import { supabase } from '@/lib/supabase';
 
-type ModuleSource = {
+export type ModuleSource = {
   id: number;
   module_id: number;
   source_type: 'book' | 'video' | 'article' | 'podcast' | 'other';
-  title: string;
-  description: string | null;
   url: string | null;
-  author: string | null;
-  meta: any;
+  image_url: string | null;
+  thumbnail_url: string | null;
   order_index: number;
-  image_url?: string;
-  thumbnail_url?: string;
+  translations: {
+    [lang: string]: {
+      title: string;
+      description: string;
+    };
+  };
 };
 
 export default function ModuleDetailLegacy() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
   const [modules, setModules] = useState<any[]>([]);
   const [module, setModule] = useState<any | null>(null);
   const [currentLessonIndex, setCurrentLessonIndex] = useState(0);
@@ -270,6 +272,7 @@ export default function ModuleDetailLegacy() {
             )}
 
             {/* Extra sources section */}
+            {/* Extra resources section */}
             {sources.length > 0 && (
               <section className="bg-white rounded-3xl shadow-sm border border-gray-100 p-6">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
@@ -279,34 +282,33 @@ export default function ModuleDetailLegacy() {
 
                 <div className="space-y-4">
                   {sources.map((src: ModuleSource) => {
+                    const { title, description } = getSourceTexts(src, lang);
                     const hasImage = src.image_url || src.thumbnail_url;
 
                     return (
                       <div
                         key={src.id}
-                        className="p-3 rounded-2xl hover:bg-gray-50 transition-colors group cursor-default"
+                        className="p-3 rounded-2xl hover:bg-gray-50 transition-colors cursor-default"
                       >
                         <div
                           className={`flex ${
                             hasImage ? 'items-start' : 'items-center'
-                          } gap-3`}
+                          } gap-3 group`}
                         >
-                          {/* Left side: text + optional image */}
+                          {/* Left: text + miniatura */}
                           <div className="flex-1">
                             {hasImage && (
                               <div
                                 className="mb-2 w-16 h-16 rounded-xl overflow-hidden bg-gray-100 cursor-pointer flex-shrink-0 group-hover:shadow-md group-hover:scale-[1.05] transition-all"
                                 onClick={() =>
                                   openImageModal(
-                                    src.image_url ||
-                                      src.thumbnail_url ||
-                                      ''
+                                    src.image_url || src.thumbnail_url || ''
                                   )
                                 }
                               >
                                 <img
                                   src={src.thumbnail_url || src.image_url}
-                                  alt={src.title}
+                                  alt={title}
                                   className="w-full h-full object-cover"
                                   loading="lazy"
                                 />
@@ -319,28 +321,23 @@ export default function ModuleDetailLegacy() {
                                   href={src.url}
                                   target="_blank"
                                   rel="noreferrer"
-                                  className="hover:text-violet-700 transition-colors hover:underline"
+                                  className="hover:text-violet-700 hover:underline transition-colors"
                                 >
-                                  {src.title}
+                                  {title}
                                 </a>
                               ) : (
-                                src.title
+                                title
                               )}
                             </h4>
 
-                            {src.author && (
-                              <p className="text-sm text-gray-500 mb-1">
-                                {src.author}
-                              </p>
-                            )}
-                            {src.description && (
+                            {description && (
                               <p className="text-sm text-gray-600">
-                                {src.description}
+                                {description}
                               </p>
                             )}
                           </div>
 
-                          {/* Tag + externí odkaz */}
+                          {/* Right: tag + externí odkaz */}
                           <div className="flex-shrink-0 flex flex-col gap-1 items-end">
                             {src.source_type === 'book' && (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-50 text-amber-700">
