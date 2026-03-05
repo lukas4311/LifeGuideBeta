@@ -32,7 +32,7 @@ const colorMap: Record<string, { color: string; bgColor: string }> = {
   happiness: { color: 'text-module-navigation',    bgColor: 'bg-module-navigation/10' },
 };
 
-const DailyQuestionnaire = () => {
+const DailyQuestionnaire = ({onComplete}: {onComplete?: () => void}) => {
   const { t, lang } = useLanguage(); // lang: 'cs' | 'en'
   const [questions, setQuestions] = useState<DailyQuestion[]>([]);
   const [currentStep, setCurrentStep] = useState(0);

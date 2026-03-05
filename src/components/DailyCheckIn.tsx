@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -7,6 +7,7 @@ import { Sun, Cloud, CloudRain, Zap, Heart, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { dailyCheckinService } from '@/lib/dailyCheckin';
+import DailyQuestionnaire from './DailyQuestionnaire'; // IMPORT TVÉ KOMPONENTY
 
 const moodIcons = {
   radiant:    { icon: Sun,       color: 'text-amber-500', bg: 'bg-amber-50 border-amber-200',   gradient: 'from-amber-400 to-orange-500' },
@@ -26,8 +27,11 @@ export default function DailyCheckIn() {
   const [note, setNote] = useState('');
   const [saving, setSaving] = useState(false);
   const [todayDone, setTodayDone] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [history, setHistory] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+
+  // Stav pro zobrazení dotazníku
+  const [showQuestionnaire, setShowQuestionnaire] = useState(false);
 
   const today = format(new Date(), 'yyyy-MM-dd');
 
@@ -37,11 +41,10 @@ export default function DailyCheckIn() {
       try {
         setLoading(true);
 
-        // posledních 30 dní
         const hist = await dailyCheckinService.getHistory(30);
         setHistory(hist);
 
-        const todayCheckIn = hist.find(c => c.date === today);
+        const todayCheckIn = hist.find((c: any) => c.date === today);
         if (todayCheckIn) {
           setTodayDone(true);
           setEnergy(todayCheckIn.energy_level);
@@ -70,7 +73,7 @@ export default function DailyCheckIn() {
 
       setTodayDone(true);
 
-      // Update history (přepiš dnešní nebo přidej)
+      // Update history
       setHistory(prev => {
         const withoutToday = prev.filter(c => c.date !== saved.date);
         return [saved, ...withoutToday].sort(
@@ -79,6 +82,10 @@ export default function DailyCheckIn() {
       });
 
       toast.success(t('checkInSaved'));
+      
+      // Po úspěšném uložení automaticky zobraz dotazník
+      setShowQuestionnaire(true);
+      
     } catch (error) {
       console.error('Error saving check-in:', error);
       toast.error('Nepodařilo se uložit check-in');
@@ -91,6 +98,27 @@ export default function DailyCheckIn() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="w-8 h-8 border-4 border-gray-200 border-t-amber-500 rounded-full animate-spin" />
+      </div>
+    );
+  }
+
+  // POKUD JE AKTIVNÍ DOTAZNÍK, VYKRESLI JEJ
+  if (showQuestionnaire) {
+    return (
+      <div className="min-h-screen py-12 px-4 relative">
+        {/* Tlačítko pro zavření/přeskočení dotazníku */}
+        <div className="max-w-2xl mx-auto mb-4 flex justify-end">
+          <Button 
+            variant="ghost" 
+            onClick={() => setShowQuestionnaire(false)}
+            className="text-gray-500 hover:text-gray-900"
+          >
+            Přeskočit reflexi ✕
+          </Button>
+        </div>
+        
+        {/* Vložená oddělená komponenta */}
+        <DailyQuestionnaire onComplete={() => setShowQuestionnaire(false)} />
       </div>
     );
   }
@@ -115,17 +143,32 @@ export default function DailyCheckIn() {
           </p>
         </motion.div>
 
-        {/* Info o uložení */}
-        {todayDone && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95 }}
-            animate={{ opacity: 1, scale: 1 }}
-            className="mb-8 p-4 rounded-2xl bg-green-50 border border-green-200 flex items-center gap-3"
-          >
-            <Check className="w-5 h-5 text-green-600" />
-            <span className="text-green-700 font-medium">{t('checkInSaved')}</span>
-          </motion.div>
-        )}
+        {/* Info o uložení + tlačítko pro vyvolání dotazníku manuálně */}
+        <AnimatePresence>
+          {todayDone && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, height: 0 }}
+              animate={{ opacity: 1, scale: 1, height: 'auto' }}
+              exit={{ opacity: 0, scale: 0.95, height: 0 }}
+              className="mb-8 overflow-hidden"
+            >
+              <div className="p-4 rounded-2xl bg-green-50 border border-green-200 flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3">
+                  <Check className="w-5 h-5 text-green-600" />
+                  <span className="text-green-700 font-medium">{t('checkInSaved')}</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => setShowQuestionnaire(true)}
+                  className="bg-white text-green-700 border-green-200 hover:bg-green-100"
+                >
+                  Denní reflexe →
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
 
         {/* Energy slider */}
         <motion.div
@@ -144,7 +187,7 @@ export default function DailyCheckIn() {
             <span className="text-2xl text-gray-300 font-light">/10</span>
           </div>
           <div className="flex gap-2">
-            {[1,2,3,4,5,6,7,8,9,10].map(n => (
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
               <button
                 key={n}
                 onClick={() => setEnergy(n)}
@@ -183,21 +226,13 @@ export default function DailyCheckIn() {
                   key={m}
                   onClick={() => setMood(m)}
                   className={`flex flex-col items-center gap-2 p-4 rounded-2xl border-2 transition-all duration-300 ${
-                    isSelected
-                      ? `${moodData.bg} shadow-md scale-105`
+                    isSelected 
+                      ? `${moodData.bg} shadow-md scale-105` 
                       : 'border-transparent hover:bg-gray-50'
                   }`}
                 >
-                  <MoodIcon
-                    className={`w-8 h-8 ${
-                      isSelected ? moodData.color : 'text-gray-300'
-                    }`}
-                  />
-                  <span
-                    className={`text-xs font-medium ${
-                      isSelected ? 'text-gray-900' : 'text-gray-400'
-                    }`}
-                  >
+                  <MoodIcon className={`w-8 h-8 ${isSelected ? moodData.color : 'text-gray-300'}`} />
+                  <span className={`text-xs font-medium ${isSelected ? 'text-gray-900' : 'text-gray-400'}`}>
                     {t(m)}
                   </span>
                 </button>
@@ -217,7 +252,7 @@ export default function DailyCheckIn() {
             value={note}
             onChange={e => setNote(e.target.value)}
             placeholder={t('addNote')}
-            className="min-h-[120px] border-gray-200 rounded-2xl text-base resize-none"
+            className="min-h-[120px] border-gray-200 rounded-2xl text-base resize-none focus-visible:ring-amber-500/20"
           />
         </motion.div>
 
@@ -237,7 +272,7 @@ export default function DailyCheckIn() {
           </Button>
         </motion.div>
 
-        {/* History chart */}
+        {/* Recent history */}
         {history.length > 0 && (
           <motion.div
             initial={{ opacity: 0 }}
@@ -245,34 +280,27 @@ export default function DailyCheckIn() {
             transition={{ delay: 0.5 }}
             className="mt-12"
           >
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">
-              {t('energyTrend')}
-            </h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">{t('energyTrend')}</h3>
             <div className="flex gap-1.5 items-end h-32">
-              {history
-                .slice(0, 14)
-                .reverse()
-                .map(checkIn => {
-                  const height = (checkIn.energy_level / 10) * 100;
-                  return (
-                    <div key={checkIn.id} className="flex-1 flex flex-col items-center gap-1">
-                      <span className="text-[10px] text-gray-400 font-medium">
-                        {checkIn.energy_level}
-                      </span>
-                      <div
-                        className="w-full rounded-xl transition-all duration-500"
-                        style={{
-                          height: `${height}%`,
-                          background: `linear-gradient(to top, hsl(${40 + checkIn.energy_level * 12}, 80%, 50%), hsl(${40 + checkIn.energy_level * 12}, 80%, 65%))`,
-                          minHeight: '8px',
-                        }}
-                      />
-                      <span className="text-[9px] text-gray-300">
-                        {format(new Date(checkIn.date), 'dd')}
-                      </span>
-                    </div>
-                  );
-                })}
+              {history.slice(0, 14).reverse().map((checkIn) => {
+                const height = (checkIn.energy_level / 10) * 100;
+                return (
+                  <div key={checkIn.id} className="flex-1 flex flex-col items-center gap-1">
+                    <span className="text-[10px] text-gray-400 font-medium">{checkIn.energy_level}</span>
+                    <div 
+                      className="w-full rounded-xl transition-all duration-500"
+                      style={{ 
+                        height: `${height}%`, 
+                        background: `linear-gradient(to top, hsl(${40 + checkIn.energy_level * 12}, 80%, 50%), hsl(${40 + checkIn.energy_level * 12}, 80%, 65%))`,
+                        minHeight: '8px'
+                      }}
+                    />
+                    <span className="text-[9px] text-gray-300">
+                      {format(new Date(checkIn.date), 'dd')}
+                    </span>
+                  </div>
+                );
+              })}
             </div>
           </motion.div>
         )}
