@@ -107,7 +107,7 @@ export default function DailyCheckIn() {
     return (
       <div className="min-h-screen py-12 px-4 relative">
         {/* Tlačítko pro zavření/přeskočení dotazníku */}
-        <div className="max-w-2xl mx-auto mb-4 flex justify-end">
+        {/* <div className="max-w-2xl mx-auto mb-4 flex justify-end">
           <Button 
             variant="ghost" 
             onClick={() => setShowQuestionnaire(false)}
@@ -115,7 +115,7 @@ export default function DailyCheckIn() {
           >
             Přeskočit reflexi ✕
           </Button>
-        </div>
+        </div> */}
         
         {/* Vložená oddělená komponenta */}
         <DailyQuestionnaire onComplete={() => setShowQuestionnaire(false)} />
