@@ -248,6 +248,7 @@ export default function ModuleDetailLegacy() {
                 key={currentLesson.id}
                 lesson={currentLesson}
                 moduleColor={module.color}
+                moduleId={moduleId}
                 moduleTextColor={module.textColor}
                 moduleAccent={module.accentColor}
                 progressData={currentProgress}

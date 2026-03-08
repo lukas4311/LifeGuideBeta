@@ -1,17 +1,22 @@
 import React, { useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { CheckCircle2, Lightbulb, PenLine, ChevronLeft, ChevronRight, Sparkles } from 'lucide-react';
+import {
+  CheckCircle2, Lightbulb, PenLine,
+  ChevronLeft, ChevronRight, Sparkles, BookOpen, X
+} from 'lucide-react';
 import { useLanguage } from './LanguageContext';
 import { toast } from 'sonner';
+import ModuleExperience from './ModuleExperience';
 
-export default function LessonContentLegacy({ 
-  lesson, 
-  moduleColor, 
-  moduleTextColor, 
+export default function LessonContentLegacy({
+  lesson,
+  moduleColor,
+  moduleTextColor,
   moduleAccent,
+  moduleId,
   progressData,
   onSaveProgress,
   onNext,
@@ -19,13 +24,13 @@ export default function LessonContentLegacy({
   isFirst,
   isLast,
   lessonIndex,
-  totalLessons
+  totalLessons,
 }) {
   const { t } = useLanguage();
   const [reflection, setReflection] = useState(progressData?.reflection_text || '');
   const [energyRating, setEnergyRating] = useState(progressData?.energy_rating || 5);
   const [saving, setSaving] = useState(false);
-  const [completed, setCompleted] = useState(progressData?.completed || false);
+  const [showExercise, setShowExercise] = useState(false);
 
   const isCompleted = progressData?.completed;
 
@@ -40,6 +45,46 @@ export default function LessonContentLegacy({
     toast.success(markComplete ? '✨ ' + t('completed') + '!' : t('saved'));
   };
 
+  const handleExerciseComplete = async () => {
+    setShowExercise(false);
+    // po dokončení cvičení automaticky označ lekci jako hotovou
+    await handleSave(true);
+    toast.success('✨ ' + t('completed') + '!');
+  };
+
+  // ── Cvičení – fullscreen overlay ──────────────────────────────────────────
+  if (showExercise) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 30 }}
+          className="relative"
+        >
+          {/* Tlačítko pro zavření */}
+          <div className="flex justify-end mb-4">
+            <Button
+              variant="ghost"
+              onClick={() => setShowExercise(false)}
+              className="text-gray-400 hover:text-gray-700 rounded-xl flex items-center gap-2"
+            >
+              <X className="w-4 h-4" />
+              {t('back') || 'Zpět na lekci'}
+            </Button>
+          </div>
+
+          {/* Komponenta cvičení */}
+          <ModuleExperience
+            lessonKey={`m${moduleId}L${lesson.id.replace('l', '')}`}
+            onComplete={handleExerciseComplete}
+          />
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
+
+  // ── Normální zobrazení lekce ──────────────────────────────────────────────
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -50,7 +95,9 @@ export default function LessonContentLegacy({
       {/* Lesson header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-3">
-          <Badge className={`${moduleColor.replace('from-', 'bg-').split(' ')[0]} text-white border-0 px-3 py-1`}>
+          <Badge
+            className={`${moduleColor.replace('from-', 'bg-').split(' ')[0]} text-white border-0 px-3 py-1`}
+          >
             {lessonIndex + 1}/{totalLessons}
           </Badge>
           {isCompleted && (
@@ -74,20 +121,48 @@ export default function LessonContentLegacy({
         </p>
       </div>
 
-      {/* Exercise card */}
-      <div className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 p-6 md:p-8 mb-10">
-        <div className="flex items-start gap-3 mb-4">
+      {/* Exercise card – nahrazena novou komponentou */}
+      <motion.div
+        whileHover={{ scale: 1.01 }}
+        transition={{ duration: 0.2 }}
+        className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 p-6 md:p-8 mb-10"
+      >
+        <div className="flex items-start gap-3 mb-5">
           <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
             <Lightbulb className="w-5 h-5 text-amber-600" />
           </div>
-          <div>
-            <h3 className="text-lg font-bold text-amber-900 mb-2">{t('exercise')}</h3>
+          <div className="flex-1">
+            <h3 className="text-lg font-bold text-amber-900 mb-2">
+              {t('exercise')}
+            </h3>
             <p className="text-amber-800 leading-relaxed">
               {t(lesson.exerciseKey)}
             </p>
           </div>
         </div>
-      </div>
+
+        {/* Tlačítko pro spuštění interaktivního cvičení */}
+        <Button
+          onClick={() => setShowExercise(true)}
+          className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white flex items-center justify-center gap-2 py-5"
+        >
+          <BookOpen className="w-4 h-4" />
+          {t('startExercise') || 'Spustit cvičení'}
+          <ChevronRight className="w-4 h-4" />
+        </Button>
+
+        {/* Indikátor dokončení cvičení */}
+        {isCompleted && (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-3 flex items-center justify-center gap-2 text-sm text-green-600 font-medium"
+          >
+            <CheckCircle2 className="w-4 h-4" />
+            {t('exerciseCompleted') || 'Cvičení dokončeno'}
+          </motion.div>
+        )}
+      </motion.div>
 
       {/* Reflection area */}
       <div className="rounded-2xl bg-white border border-gray-200 p-6 md:p-8 mb-8 shadow-sm">
@@ -97,7 +172,7 @@ export default function LessonContentLegacy({
         </div>
         <Textarea
           value={reflection}
-          onChange={(e) => setReflection(e.target.value)}
+          onChange={e => setReflection(e.target.value)}
           placeholder={t('reflectionPlaceholder')}
           className="min-h-[150px] border-gray-200 focus:border-violet-300 rounded-xl text-base resize-none"
         />
@@ -106,20 +181,21 @@ export default function LessonContentLegacy({
         <div className="mt-6">
           <div className="flex items-center justify-between mb-3">
             <span className="text-sm font-medium text-gray-600">{t('energyLevel')}</span>
-            <span className="text-2xl font-bold" style={{ color: moduleAccent }}>{energyRating}/10</span>
+            <span className="text-2xl font-bold" style={{ color: moduleAccent }}>
+              {energyRating}/10
+            </span>
           </div>
           <div className="flex gap-1.5">
             {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
               <button
                 key={n}
                 onClick={() => setEnergyRating(n)}
-                className={`flex-1 h-10 rounded-xl text-sm font-medium transition-all duration-200 ${
-                  n <= energyRating
+                className={`flex-1 h-10 rounded-xl text-sm font-medium transition-all duration-200 ${n <= energyRating
                     ? 'text-white shadow-md scale-105'
                     : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                }`}
-                style={n <= energyRating ? { 
-                  background: `linear-gradient(135deg, ${moduleAccent}, ${moduleAccent}dd)` 
+                  }`}
+                style={n <= energyRating ? {
+                  background: `linear-gradient(135deg, ${moduleAccent}, ${moduleAccent}dd)`
                 } : {}}
               >
                 {n}
