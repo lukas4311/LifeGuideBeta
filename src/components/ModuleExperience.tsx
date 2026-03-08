@@ -106,7 +106,7 @@ export default function ModuleExperience({ lessonKey, onComplete }: ModuleExperi
   const trans = step.translations[lang] || step.translations['cs'] || step.translations['en'] || {};
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-amber-50 via-white to-orange-50">
+    <div className="bg-gradient-to-br from-amber-50 via-white to-orange-50">
       {/* Progress bar */}
       <div className="sticky top-0 left-0 right-0 h-1 bg-gray-100 z-50">
         <motion.div
@@ -225,14 +225,14 @@ function StepIntro({ trans, onNext }: { trans: any; onNext: (d?: any) => void })
         </motion.p>
       )}
 
-      <motion.h1
+      {/* <motion.h1
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.7 }}
         className="text-4xl md:text-6xl font-bold text-gray-900 mb-4"
       >
         {trans.title}
-      </motion.h1>
+      </motion.h1> */}
 
       {trans.subtitle && (
         <motion.p

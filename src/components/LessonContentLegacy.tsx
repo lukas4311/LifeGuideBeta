@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import {
   CheckCircle2, Lightbulb, PenLine,
-  ChevronLeft, ChevronRight, Sparkles, BookOpen, X
+  ChevronLeft, ChevronRight, Sparkles, BookOpen
 } from 'lucide-react';
 import { useLanguage } from './LanguageContext';
 import { toast } from 'sonner';
@@ -30,7 +30,6 @@ export default function LessonContentLegacy({
   const [reflection, setReflection] = useState(progressData?.reflection_text || '');
   const [energyRating, setEnergyRating] = useState(progressData?.energy_rating || 5);
   const [saving, setSaving] = useState(false);
-  const [showExercise, setShowExercise] = useState(false);
 
   const isCompleted = progressData?.completed;
 
@@ -46,45 +45,11 @@ export default function LessonContentLegacy({
   };
 
   const handleExerciseComplete = async () => {
-    setShowExercise(false);
-    // po dokončení cvičení automaticky označ lekci jako hotovou
+    // po dokončení cvičení můžeš např. jen uložit completed
     await handleSave(true);
     toast.success('✨ ' + t('completed') + '!');
   };
 
-  // ── Cvičení – fullscreen overlay ──────────────────────────────────────────
-  if (showExercise) {
-    return (
-      <AnimatePresence>
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: 30 }}
-          className="relative"
-        >
-          {/* Tlačítko pro zavření */}
-          <div className="flex justify-end mb-4">
-            <Button
-              variant="ghost"
-              onClick={() => setShowExercise(false)}
-              className="text-gray-400 hover:text-gray-700 rounded-xl flex items-center gap-2"
-            >
-              <X className="w-4 h-4" />
-              {t('back') || 'Zpět na lekci'}
-            </Button>
-          </div>
-
-          {/* Komponenta cvičení */}
-          <ModuleExperience
-            lessonKey={`m${moduleId}L${lesson.id.replace('l', '')}`}
-            onComplete={handleExerciseComplete}
-          />
-        </motion.div>
-      </AnimatePresence>
-    );
-  }
-
-  // ── Normální zobrazení lekce ──────────────────────────────────────────────
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -121,13 +86,13 @@ export default function LessonContentLegacy({
         </p>
       </div>
 
-      {/* Exercise card – nahrazena novou komponentou */}
+      {/* Exercise card + vložené kroky cvičení */}
       <motion.div
         whileHover={{ scale: 1.01 }}
         transition={{ duration: 0.2 }}
         className="rounded-2xl bg-gradient-to-br from-amber-50 to-orange-50 border border-amber-100 p-6 md:p-8 mb-10"
       >
-        <div className="flex items-start gap-3 mb-5">
+        {/* <div className="flex items-start gap-3 mb-5">
           <div className="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center flex-shrink-0">
             <Lightbulb className="w-5 h-5 text-amber-600" />
           </div>
@@ -135,33 +100,25 @@ export default function LessonContentLegacy({
             <h3 className="text-lg font-bold text-amber-900 mb-2">
               {t('exercise')}
             </h3>
-            <p className="text-amber-800 leading-relaxed">
+            <p className="text-amber-800 leading-relaxed mb-4">
               {t(lesson.exerciseKey)}
             </p>
           </div>
-        </div>
+        </div> */}
 
-        {/* Tlačítko pro spuštění interaktivního cvičení */}
-        <Button
-          onClick={() => setShowExercise(true)}
-          className="w-full rounded-xl bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white flex items-center justify-center gap-2 py-5"
-        >
-          <BookOpen className="w-4 h-4" />
-          {t('startExercise') || 'Spustit cvičení'}
-          <ChevronRight className="w-4 h-4" />
-        </Button>
+        {/* Volitelné malé tlačítko jen jako vizuální start */}
+        {/* <div className="flex items-center gap-2 mb-6">
+          <BookOpen className="w-4 h-4 text-amber-700" />
+          <span className="text-sm text-amber-800">
+            {t('startExercise') || 'Začni vyplňovat cvičení níže'}
+          </span>
+        </div> */}
 
-        {/* Indikátor dokončení cvičení */}
-        {isCompleted && (
-          <motion.div
-            initial={{ opacity: 0, y: 5 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mt-3 flex items-center justify-center gap-2 text-sm text-green-600 font-medium"
-          >
-            <CheckCircle2 className="w-4 h-4" />
-            {t('exerciseCompleted') || 'Cvičení dokončeno'}
-          </motion.div>
-        )}
+        {/* Tady je přímo celé cvičení jako součást stránky */}
+        <ModuleExperience
+          lessonKey={`m${moduleId}L${lesson.id.replace('l', '')}`}
+          onComplete={handleExerciseComplete}
+        />
       </motion.div>
 
       {/* Reflection area */}
@@ -186,14 +143,15 @@ export default function LessonContentLegacy({
             </span>
           </div>
           <div className="flex gap-1.5">
-            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+            {[1,2,3,4,5,6,7,8,9,10].map(n => (
               <button
                 key={n}
                 onClick={() => setEnergyRating(n)}
-                className={`flex-1 h-10 rounded-xl text-sm font-medium transition-all duration-200 ${n <= energyRating
+                className={`flex-1 h-10 rounded-xl text-sm font-medium transition-all duration-200 ${
+                  n <= energyRating
                     ? 'text-white shadow-md scale-105'
                     : 'bg-gray-100 text-gray-400 hover:bg-gray-200'
-                  }`}
+                }`}
                 style={n <= energyRating ? {
                   background: `linear-gradient(135deg, ${moduleAccent}, ${moduleAccent}dd)`
                 } : {}}
