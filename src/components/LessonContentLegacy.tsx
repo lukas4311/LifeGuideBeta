@@ -116,7 +116,7 @@ export default function LessonContentLegacy({
 
         {/* Tady je přímo celé cvičení jako součást stránky */}
         <ModuleExperience
-          exercise_key={`m${moduleId}L${lesson.id.replace('l', '')}Exercise`}
+          exercise_key={lesson.exerciseKey}
           onComplete={handleExerciseComplete}
         />
       </motion.div>
