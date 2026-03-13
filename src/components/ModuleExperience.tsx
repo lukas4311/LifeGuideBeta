@@ -1,4 +1,5 @@
 // components/ModuleExperience.tsx
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useLanguage } from './LanguageContext';
@@ -8,11 +9,11 @@ import { ChevronRight, ChevronLeft, Check, Sparkles } from 'lucide-react';
 import { moduleExerciseService, type ExerciseStep } from '@/lib/moduleExerciseService';
 
 interface ModuleExperienceProps {
-  lessonKey: string;
+  exercise_key: string;
   onComplete?: () => void;
 }
 
-export default function ModuleExperience({ lessonKey, onComplete }: ModuleExperienceProps) {
+export default function ModuleExperience({ exercise_key, onComplete }: ModuleExperienceProps) {
   const { lang } = useLanguage();
   const [steps, setSteps] = useState<ExerciseStep[]>([]);
   const [currentStep, setCurrentStep] = useState(0);
@@ -23,12 +24,9 @@ export default function ModuleExperience({ lessonKey, onComplete }: ModuleExperi
     try {
       setLoading(true);
       const [fetchedSteps, fetchedAnswers] = await Promise.all([
-        moduleExerciseService.getSteps(lessonKey),
-        moduleExerciseService.getAnswers(lessonKey),
+        moduleExerciseService.getSteps(exercise_key),
+        moduleExerciseService.getAnswers(exercise_key),
       ]);
-
-      console.log('Fetched steps:', fetchedSteps);  // ← přidej
-      console.log('Fetched answers:', fetchedAnswers); // ← přidej
 
       setSteps(fetchedSteps);
 
@@ -39,24 +37,22 @@ export default function ModuleExperience({ lessonKey, onComplete }: ModuleExperi
       }
       setAnswers(map);
 
-      // Najdi poslední nedokončený krok
-      const lastAnswered = fetchedAnswers
+      // Obnov poslední nedokončený krok
+      const lastCompletedIndex = fetchedAnswers
         .filter(a => a.completed)
-        .map(a => {
-          const idx = fetchedSteps.findIndex(s => s.id === a.step_id);
-          return idx;
-        })
+        .map(a => fetchedSteps.findIndex(s => s.id === a.step_id))
+        .filter(idx => idx >= 0)
         .sort((a, b) => b - a)[0];
 
-      if (lastAnswered !== undefined && lastAnswered < fetchedSteps.length - 1) {
-        setCurrentStep(lastAnswered + 1);
+      if (lastCompletedIndex !== undefined && lastCompletedIndex < fetchedSteps.length - 1) {
+        setCurrentStep(lastCompletedIndex + 1);
       }
     } catch (err) {
       console.error('Error loading exercise:', err);
     } finally {
       setLoading(false);
     }
-  }, [lessonKey]);
+  }, [exercise_key]);
 
   useEffect(() => {
     load();
@@ -64,14 +60,16 @@ export default function ModuleExperience({ lessonKey, onComplete }: ModuleExperi
 
   const handleNext = async (stepAnswerData: Record<string, any> = {}) => {
     const step = steps[currentStep];
-
     const merged = { ...(answers[step.id] || {}), ...stepAnswerData };
-    setAnswers(prev => ({ ...prev, [step.id]: merged }));
-
     const isLast = currentStep === steps.length - 1;
 
-    // ← odstraněno moduleId, zůstává jen stepId
-    await moduleExerciseService.upsertAnswer(step.id, merged, isLast);
+    setAnswers(prev => ({ ...prev, [step.id]: merged }));
+
+    try {
+      await moduleExerciseService.upsertAnswer(step.id, merged, isLast);
+    } catch (err) {
+      console.error('Error saving answer:', err);
+    }
 
     if (isLast) {
       onComplete?.();
@@ -101,9 +99,9 @@ export default function ModuleExperience({ lessonKey, onComplete }: ModuleExperi
   const step = steps[currentStep];
   const isFirst = currentStep === 0;
   const isLast = currentStep === steps.length - 1;
-  const progress = (currentStep / (steps.length - 1)) * 100;
+  const progress = steps.length > 1 ? (currentStep / (steps.length - 1)) * 100 : 100;
   const savedData = answers[step.id] || {};
-  const trans = step.translations[lang] || step.translations['cs'] || step.translations['en'] || {};
+  const trans = step.translations[lang] ?? step.translations['cs'] ?? step.translations['en'] ?? {};
 
   return (
     <div className="bg-gradient-to-br from-amber-50 via-white to-orange-50">
@@ -134,7 +132,7 @@ export default function ModuleExperience({ lessonKey, onComplete }: ModuleExperi
   );
 }
 
-// ─── Step renderer ──────────────────────────────────────────────────────────
+// ─── Step renderer ────────────────────────────────────────────────────────────
 
 interface StepRendererProps {
   step: ExerciseStep;
@@ -165,7 +163,7 @@ function StepRenderer({ step, trans, savedData, isFirst, isLast, onNext, onBack 
         <StepTextareaList
           trans={trans}
           savedData={savedData}
-          count={step.items_count || 3}
+          count={step.items_count ?? 3}
           onNext={onNext}
           onBack={onBack}
         />
@@ -175,7 +173,7 @@ function StepRenderer({ step, trans, savedData, isFirst, isLast, onNext, onBack 
         <StepInputList
           trans={trans}
           savedData={savedData}
-          count={step.items_count || 5}
+          count={step.items_count ?? 5}
           onNext={onNext}
           onBack={onBack}
         />
@@ -195,7 +193,7 @@ function StepRenderer({ step, trans, savedData, isFirst, isLast, onNext, onBack 
   }
 }
 
-// ─── Intro step ──────────────────────────────────────────────────────────────
+// ─── Intro step ───────────────────────────────────────────────────────────────
 
 function StepIntro({ trans, onNext }: { trans: any; onNext: (d?: any) => void }) {
   return (
@@ -219,20 +217,11 @@ function StepIntro({ trans, onNext }: { trans: any; onNext: (d?: any) => void })
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.5 }}
-          className="text-lg md:text-xl text-gray-500 mb-4 italic"
+          className="text-lg md:text-xl text-gray-500 mb-6 italic max-w-2xl mx-auto whitespace-pre-line"
         >
           "{trans.quote}"
         </motion.p>
       )}
-
-      {/* <motion.h1
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 0.7 }}
-        className="text-4xl md:text-6xl font-bold text-gray-900 mb-4"
-      >
-        {trans.title}
-      </motion.h1> */}
 
       {trans.subtitle && (
         <motion.p
@@ -251,14 +240,14 @@ function StepIntro({ trans, onNext }: { trans: any; onNext: (d?: any) => void })
           size="lg"
           className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-lg px-8 py-6 rounded-2xl"
         >
-          {trans.button_text || 'Začít'} <ChevronRight className="ml-2" />
+          {trans.button_text ?? 'Začít'} <ChevronRight className="ml-2" />
         </Button>
       </motion.div>
     </motion.div>
   );
 }
 
-// ─── Textarea step (single) ──────────────────────────────────────────────────
+// ─── Textarea step (single) ───────────────────────────────────────────────────
 
 function StepTextarea({ trans, savedData, isLast, onNext, onBack }: {
   trans: any;
@@ -267,7 +256,7 @@ function StepTextarea({ trans, savedData, isLast, onNext, onBack }: {
   onNext: (d?: any) => void;
   onBack: () => void;
 }) {
-  const [value, setValue] = useState<string>(savedData.text || '');
+  const [value, setValue] = useState<string>(savedData.text ?? '');
 
   return (
     <motion.div
@@ -282,7 +271,7 @@ function StepTextarea({ trans, savedData, isLast, onNext, onBack }: {
         )}
         <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">{trans.title}</h2>
         {trans.description && (
-          <p className="text-lg text-gray-600">{trans.description}</p>
+          <p className="text-lg text-gray-600 whitespace-pre-line">{trans.description}</p>
         )}
       </div>
 
@@ -310,7 +299,7 @@ function StepTextarea({ trans, savedData, isLast, onNext, onBack }: {
         <Textarea
           value={value}
           onChange={e => setValue(e.target.value)}
-          placeholder={trans.placeholder || ''}
+          placeholder={trans.placeholder ?? ''}
           className="min-h-[150px] bg-white text-base"
         />
 
@@ -319,7 +308,6 @@ function StepTextarea({ trans, savedData, isLast, onNext, onBack }: {
         )}
       </motion.div>
 
-      {/* Closing message pro finish step */}
       {trans.closing_message && (
         <motion.div
           initial={{ opacity: 0 }}
@@ -344,7 +332,7 @@ function StepTextarea({ trans, savedData, isLast, onNext, onBack }: {
   );
 }
 
-// ─── Textarea list step ──────────────────────────────────────────────────────
+// ─── Textarea list step ───────────────────────────────────────────────────────
 
 function StepTextareaList({ trans, savedData, count, onNext, onBack }: {
   trans: any;
@@ -354,7 +342,7 @@ function StepTextareaList({ trans, savedData, count, onNext, onBack }: {
   onBack: () => void;
 }) {
   const [items, setItems] = useState<string[]>(
-    savedData.items || Array(count).fill('')
+    savedData.items ?? Array(count).fill('')
   );
 
   const isComplete = items.every(b => b.trim());
@@ -387,7 +375,7 @@ function StepTextareaList({ trans, savedData, count, onNext, onBack }: {
           >
             {trans.field_label && (
               <label className="block text-sm font-medium text-gray-700 mb-3">
-                {trans.field_label.replace('{n}', index + 1)}
+                {trans.field_label.replace('{n}', String(index + 1))}
               </label>
             )}
             <Textarea
@@ -397,7 +385,7 @@ function StepTextareaList({ trans, savedData, count, onNext, onBack }: {
                 next[index] = e.target.value;
                 setItems(next);
               }}
-              placeholder={trans.placeholder || ''}
+              placeholder={trans.placeholder ?? ''}
               className="min-h-[80px] text-base"
             />
             {trans.reflection_prompt && (
@@ -416,7 +404,7 @@ function StepTextareaList({ trans, savedData, count, onNext, onBack }: {
   );
 }
 
-// ─── Input list step ─────────────────────────────────────────────────────────
+// ─── Input list step ──────────────────────────────────────────────────────────
 
 function StepInputList({ trans, savedData, count, onNext, onBack }: {
   trans: any;
@@ -426,7 +414,7 @@ function StepInputList({ trans, savedData, count, onNext, onBack }: {
   onBack: () => void;
 }) {
   const [items, setItems] = useState<string[]>(
-    savedData.items || Array(count).fill('')
+    savedData.items ?? Array(count).fill('')
   );
 
   const isComplete = items.every(b => b.trim());
@@ -466,7 +454,7 @@ function StepInputList({ trans, savedData, count, onNext, onBack }: {
               }}
               placeholder={
                 trans.placeholder
-                  ? trans.placeholder.replace('{n}', index + 1)
+                  ? trans.placeholder.replace('{n}', String(index + 1))
                   : ''
               }
               className="w-full px-6 py-4 rounded-xl border-2 border-amber-200 focus:border-amber-500 focus:ring-2 focus:ring-amber-200 text-lg"
@@ -495,7 +483,7 @@ function StepInputList({ trans, savedData, count, onNext, onBack }: {
   );
 }
 
-// ─── Fields step ─────────────────────────────────────────────────────────────
+// ─── Fields step ──────────────────────────────────────────────────────────────
 
 function StepFields({ trans, savedData, isLast, onNext, onBack }: {
   trans: any;
@@ -504,10 +492,9 @@ function StepFields({ trans, savedData, isLast, onNext, onBack }: {
   onNext: (d?: any) => void;
   onBack: () => void;
 }) {
-  const fields: { key: string; label: string; placeholder: string }[] = trans.fields || [];
+  const fields: { key: string; label: string; placeholder: string }[] = trans.fields ?? [];
   const [values, setValues] = useState<Record<string, string>>(
-    savedData.fields ||
-    Object.fromEntries(fields.map(f => [f.key, '']))
+    savedData.fields ?? Object.fromEntries(fields.map(f => [f.key, '']))
   );
 
   const isComplete = fields.every(f => values[f.key]?.trim());
@@ -525,16 +512,16 @@ function StepFields({ trans, savedData, isLast, onNext, onBack }: {
         )}
         <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">{trans.title}</h2>
         {trans.description && (
-          <p className="text-lg text-gray-600">{trans.description}</p>
+          <p className="text-lg text-gray-600 whitespace-pre-line">{trans.description}</p>
         )}
       </div>
 
       <div className="space-y-6 mb-8">
-        {fields.map((field, index) => (
+        {fields.map(field => (
           <div key={field.key} className="bg-white rounded-2xl p-6 shadow-sm border border-amber-100">
             <h3 className="font-semibold text-gray-900 mb-3">{field.label}</h3>
             <Textarea
-              value={values[field.key] || ''}
+              value={values[field.key] ?? ''}
               onChange={e => setValues(prev => ({ ...prev, [field.key]: e.target.value }))}
               placeholder={field.placeholder}
               className="min-h-[100px]"
@@ -542,6 +529,19 @@ function StepFields({ trans, savedData, isLast, onNext, onBack }: {
           </div>
         ))}
       </div>
+
+      {trans.closing_message && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="bg-gradient-to-r from-violet-50 to-purple-50 rounded-2xl p-6 mb-8 border border-violet-200"
+        >
+          <p className="text-center text-violet-800 leading-relaxed whitespace-pre-line">
+            {trans.closing_message}
+          </p>
+        </motion.div>
+      )}
 
       <NavButtons
         onBack={onBack}
@@ -554,7 +554,7 @@ function StepFields({ trans, savedData, isLast, onNext, onBack }: {
   );
 }
 
-// ─── Shared nav buttons ──────────────────────────────────────────────────────
+// ─── Shared nav buttons ───────────────────────────────────────────────────────
 
 function NavButtons({ onBack, onNext, disabled, isLast, buttonText }: {
   onBack: () => void;
@@ -565,20 +565,28 @@ function NavButtons({ onBack, onNext, disabled, isLast, buttonText }: {
 }) {
   return (
     <div className="flex justify-between">
-      <Button variant="outline" onClick={onBack} className="rounded-xl flex items-center gap-2">
+      <Button
+        variant="outline"
+        onClick={onBack}
+        className="rounded-xl flex items-center gap-2"
+      >
         <ChevronLeft className="w-4 h-4" />
         Zpět
       </Button>
       <Button
         onClick={onNext}
         disabled={disabled}
-        className={`rounded-xl flex items-center gap-2 ${isLast
-          ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
-          : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700'
-          }`}
+        className={`rounded-xl flex items-center gap-2 ${
+          isLast
+            ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
+            : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700'
+        }`}
       >
-        {buttonText || (isLast ? 'Dokončit' : 'Pokračovat')}
-        {isLast ? <Check className="ml-2 w-4 h-4" /> : <ChevronRight className="ml-2 w-4 h-4" />}
+        {buttonText ?? (isLast ? 'Dokončit' : 'Pokračovat')}
+        {isLast
+          ? <Check className="ml-2 w-4 h-4" />
+          : <ChevronRight className="ml-2 w-4 h-4" />
+        }
       </Button>
     </div>
   );
