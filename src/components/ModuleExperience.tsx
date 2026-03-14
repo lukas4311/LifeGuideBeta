@@ -7,11 +7,18 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ChevronRight, ChevronLeft, Check, Sparkles } from 'lucide-react';
 import { moduleExerciseService, type ExerciseStep } from '@/lib/moduleExerciseService';
+import InteractiveHand from './InteractiveHand';
 
 interface ModuleExperienceProps {
   exercise_key: string;
   onComplete?: () => void;
 }
+
+// ─── Registr custom komponent ─────────────────────────────────────────────────
+// Přidej sem libovolnou novou komponentu kdykoli v budoucnu
+const COMPONENT_REGISTRY: Record<string, React.ComponentType<any>> = {
+  InteractiveHand,
+};
 
 export default function ModuleExperience({ exercise_key, onComplete }: ModuleExperienceProps) {
   const { lang } = useLanguage();
@@ -188,6 +195,8 @@ function StepRenderer({ step, trans, savedData, isFirst, isLast, onNext, onBack 
           onBack={onBack}
         />
       );
+    case 'interactive':                                            // ← nový case
+      return <StepInteractive trans={trans} onNext={onNext} onBack={onBack} />;
     default:
       return null;
   }
@@ -576,11 +585,10 @@ function NavButtons({ onBack, onNext, disabled, isLast, buttonText }: {
       <Button
         onClick={onNext}
         disabled={disabled}
-        className={`rounded-xl flex items-center gap-2 ${
-          isLast
+        className={`rounded-xl flex items-center gap-2 ${isLast
             ? 'bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700'
             : 'bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700'
-        }`}
+          }`}
       >
         {buttonText ?? (isLast ? 'Dokončit' : 'Pokračovat')}
         {isLast
@@ -589,5 +597,62 @@ function NavButtons({ onBack, onNext, disabled, isLast, buttonText }: {
         }
       </Button>
     </div>
+  );
+}
+
+// ─── Interactive step ─────────────────────────────────────────────────────────
+function StepInteractive({ trans, onNext, onBack }: {
+  trans: any;
+  onNext: (d?: any) => void;
+  onBack: () => void;
+}) {
+  const CustomComponent = trans.component
+    ? COMPONENT_REGISTRY[trans.component]
+    : null;
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 100 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -100 }}
+      className="max-w-5xl mx-auto"
+    >
+      <div className="text-center mb-8">
+        {trans.step_label && (
+          <p className="text-sm text-amber-600 font-medium mb-2">{trans.step_label}</p>
+        )}
+        <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">{trans.title}</h2>
+        {trans.description && (
+          <p className="text-lg text-gray-600">{trans.description}</p>
+        )}
+      </div>
+
+      {CustomComponent ? (
+        <div className="mb-8">
+          <CustomComponent />
+        </div>
+      ) : (
+        <div className="mb-8 p-8 bg-gray-50 rounded-2xl text-center text-gray-400">
+          Komponenta &quot;{trans.component}&quot; nenalezena v registru.
+        </div>
+      )}
+
+      {trans.completion_message && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="bg-amber-50 rounded-2xl p-6 mb-8 border border-amber-200"
+        >
+          <p className="text-center text-amber-800">{trans.completion_message}</p>
+        </motion.div>
+      )}
+
+      <NavButtons
+        onBack={onBack}
+        onNext={() => onNext()}
+        disabled={false}              // interactive step nevyžaduje vyplnění
+        buttonText={trans.button_text}
+      />
+    </motion.div>
   );
 }

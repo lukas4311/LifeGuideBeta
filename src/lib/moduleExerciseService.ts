@@ -7,7 +7,7 @@ export type ExerciseStep = {
   lesson_key: string;
   step_order: number;
   step_key: string;
-  step_type: 'intro' | 'textarea' | 'textarea_list' | 'input_list' | 'fields';
+  step_type: 'intro' | 'textarea' | 'textarea_list' | 'input_list' | 'fields' | 'interactive';
   items_count: number | null;
   translations: {
     [lang: string]: {
@@ -26,6 +26,7 @@ export type ExerciseStep = {
       placeholder?: string;
       field_label?: string;
       reflection_prompt?: string;
+      component?: string;                                          // ← název custom komponenty
       fields?: { key: string; label: string; placeholder: string }[];
     };
   };
